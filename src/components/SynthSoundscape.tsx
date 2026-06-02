@@ -18,21 +18,21 @@ const PROFILES: SoundProfileConfig[] = [
     name: 'Cosmic Slate Pad',
     description: 'A deep, nourishing structural synthesizer chord pulsing slowly.',
     icon: Sparkles,
-    color: 'from-amber-100 to-amber-200'
+    color: 'from-sage-soft to-sage-pale'
   },
   {
     id: 'waves',
     name: 'Ocean Grounding Wave',
     description: 'Pink-noise modulated gently to mimic the tide breath.',
     icon: Waves,
-    color: 'from-orange-100 to-orange-200'
+    color: 'from-ocean-soft to-ocean-pale'
   },
   {
     id: 'fireplace',
     name: 'Kindling Embers',
     description: 'Soft crackling fire sounds layered with a warm sub-bass.',
     icon: Flame,
-    color: 'from-red-100 to-red-200'
+    color: 'from-sage-pale to-ocean-soft'
   }
 ];
 
@@ -248,16 +248,16 @@ export default function SynthSoundscape() {
   };
 
   return (
-    <div id="synth-soundscape" className="bg-amber-50/75 border border-amber-100 rounded-3xl p-6 select-none relative overflow-hidden backdrop-blur-md">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200/20 rounded-full blur-2xl -mr-10 -mt-10" />
+    <div id="synth-soundscape" className="bg-warm border border-sage-soft rounded-3xl p-6 select-none relative overflow-hidden backdrop-blur-md animate-none">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-sage-soft/10 rounded-full blur-2xl -mr-10 -mt-10" />
       
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-sans font-medium text-amber-900 tracking-tight text-lg flex items-center gap-2">
-            <Volume2 className="w-5 h-5 text-amber-700 animate-pulse" />
+          <h3 className="font-sans font-medium text-earth-dark tracking-tight text-lg flex items-center gap-2">
+            <Volume2 className="w-5 h-5 text-sage-dark animate-pulse" />
             Ambient Grounding Synth
           </h3>
-          <p className="font-sans text-xs text-amber-700/80 mt-0.5">
+          <p className="font-sans text-xs text-earth-muted mt-0.5">
             Soothing real-time soundscapes computed live in your browser.
           </p>
         </div>
@@ -265,10 +265,10 @@ export default function SynthSoundscape() {
         <button
           id="soundscape-play-btn"
           onClick={handleTogglePlay}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm ${
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer ${
             isPlaying 
-              ? 'bg-amber-800 text-amber-50 hover:bg-amber-900' 
-              : 'bg-amber-100 text-amber-900 hover:bg-amber-200'
+              ? 'bg-sage text-white hover:bg-sage-dark' 
+              : 'bg-sage-soft text-sage-dark hover:bg-sage-pale'
           }`}
         >
           {isPlaying ? <Square className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
@@ -286,27 +286,27 @@ export default function SynthSoundscape() {
               onClick={() => setActiveProfile(profile.id)}
               className={`p-3 rounded-2xl border cursor-pointer transition-all duration-300 flex items-center gap-3.5 ${
                 isActive 
-                  ? 'bg-amber-100 border-amber-300 shadow-sm' 
-                  : 'bg-white/65 hover:bg-amber-50 border-amber-100/50'
+                  ? 'bg-sage-soft/40 border-sage shadow-xs' 
+                  : 'bg-white hover:bg-sage-pale/45 border-sage-soft/20'
               }`}
             >
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${profile.color} flex items-center justify-center text-amber-900`}>
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${profile.color} flex items-center justify-center text-sage-dark`}>
                 <IconComponent className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-sans text-sm font-medium text-amber-900 leading-tight">
+                <h4 className="font-sans text-sm font-medium text-earth-dark leading-tight">
                   {profile.name}
                 </h4>
-                <p className="font-sans text-xs text-amber-700/70 truncate mt-0.5">
+                <p className="font-sans text-xs text-earth-muted truncate mt-0.5">
                   {profile.description}
                 </p>
               </div>
               
               {isActive && isPlaying && (
                 <div id="playing-equalizer-bars" className="flex items-end gap-0.5 h-3">
-                  <div className="w-0.5 h-full rounded-full bg-amber-800 animate-[bounce_1s_infinite_100ms]" />
-                  <div className="w-0.5 h-2/3 rounded-full bg-amber-800 animate-[bounce_1s_infinite_300ms]" />
-                  <div className="w-0.5 h-5/6 rounded-full bg-amber-800 animate-[bounce_1s_infinite_500ms]" />
+                  <div className="w-0.5 h-full rounded-full bg-sage animate-[bounce_1s_infinite_100ms]" />
+                  <div className="w-0.5 h-2/3 rounded-full bg-sage animate-[bounce_1s_infinite_300ms]" />
+                  <div className="w-0.5 h-5/6 rounded-full bg-sage animate-[bounce_1s_infinite_500ms]" />
                 </div>
               )}
             </div>
@@ -315,12 +315,12 @@ export default function SynthSoundscape() {
       </div>
 
       <div className="space-y-2">
-        <div className="flex justify-between items-center text-xs text-amber-900 font-medium font-sans px-1">
+        <div className="flex justify-between items-center text-xs text-earth-dark font-bold font-sans px-1">
           <span className="flex items-center gap-1.5 grayscale" style={{ filter: isPlaying ? 'none' : 'grayscale(1)' }}>
-            {volume === 0 ? <VolumeX className="w-4 h-4 text-amber-700" /> : <Volume2 className="w-4 h-4 text-amber-700" />}
+            {volume === 0 ? <VolumeX className="w-4 h-4 text-sage-dark" /> : <Volume2 className="w-4 h-4 text-sage-dark" />}
             Volume
           </span>
-          <span className="font-mono text-[10px] text-amber-800">{Math.round(volume * 100)}%</span>
+          <span className="font-mono text-[10px] text-earth-muted">{Math.round(volume * 100)}%</span>
         </div>
         <input
           id="soundscape-volume-slider"
@@ -331,7 +331,7 @@ export default function SynthSoundscape() {
           value={volume}
           onChange={(e) => setVolume(parseFloat(e.target.value))}
           disabled={!isPlaying}
-          className="w-full accent-amber-800 h-1 bg-amber-200 rounded-lg cursor-pointer transition-opacity duration-300 disabled:opacity-40"
+          className="w-full accent-sage h-1 bg-sage-soft rounded-lg cursor-pointer transition-opacity duration-300 disabled:opacity-40"
         />
       </div>
     </div>

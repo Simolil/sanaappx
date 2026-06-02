@@ -13,16 +13,16 @@ interface BreathingStep {
 }
 
 const BOX_STEPS: BreathingStep[] = [
-  { state: 'inhale', text: 'Breathe in slowly...', duration: 4, scale: 1.6, color: 'bg-emerald-100/90 text-emerald-900 border-emerald-300' },
-  { state: 'hold_in', text: 'Suspend the breath...', duration: 4, scale: 1.6, color: 'bg-indigo-100/90 text-indigo-900 border-indigo-300' },
-  { state: 'exhale', text: 'Breathe out softly...', duration: 4, scale: 1.0, color: 'bg-amber-100/90 text-amber-900 border-amber-300' },
-  { state: 'hold_out', text: 'Rest fully...', duration: 4, scale: 1.0, color: 'bg-orange-100/90 text-orange-900 border-orange-300' }
+  { state: 'inhale', text: 'Breathe in slowly...', duration: 4, scale: 1.6, color: 'bg-sage-soft text-sage-dark border-sage' },
+  { state: 'hold_in', text: 'Suspend the breath...', duration: 4, scale: 1.6, color: 'bg-ocean-soft text-ocean-dark border-ocean' },
+  { state: 'exhale', text: 'Breathe out softly...', duration: 4, scale: 1.0, color: 'bg-sage-pale text-sage-dark border-sage-soft' },
+  { state: 'hold_out', text: 'Rest fully...', duration: 4, scale: 1.0, color: 'bg-ocean-pale text-ocean-dark border-ocean-soft' }
 ];
 
 const G_STEPS: BreathingStep[] = [
-  { state: 'inhale', text: 'Inhale through nose...', duration: 4, scale: 1.6, color: 'bg-emerald-100/90 text-emerald-900 border-emerald-300' },
-  { state: 'hold_in', text: 'Hold deep and center...', duration: 7, scale: 1.6, color: 'bg-indigo-100/90 text-indigo-900 border-indigo-300' },
-  { state: 'exhale', text: 'Sigh out loud...', duration: 8, scale: 1.0, color: 'bg-amber-100/90 text-amber-900 border-amber-300' }
+  { state: 'inhale', text: 'Inhale through nose...', duration: 4, scale: 1.6, color: 'bg-sage-soft text-sage-dark border-sage' },
+  { state: 'hold_in', text: 'Hold deep and center...', duration: 7, scale: 1.6, color: 'bg-ocean-soft text-ocean-dark border-ocean' },
+  { state: 'exhale', text: 'Sigh out loud...', duration: 8, scale: 1.0, color: 'bg-sage-pale text-sage-dark border-sage-soft' }
 ];
 
 export default function BreathingExercise() {
@@ -94,18 +94,18 @@ export default function BreathingExercise() {
 
   // Get current circular background animation scales
   const bubbleScale = isActive ? currentStep.scale : 1.15;
-  const bubbleColor = isActive ? currentStep.color.split(' ')[0] : 'bg-[#faf6f0]';
-  const borderHighlight = isActive ? currentStep.color.split(' ')[2] : 'border-[#e6dfd5]';
+  const bubbleColor = isActive ? currentStep.color.split(' ')[0] : 'bg-sage-pale';
+  const borderHighlight = isActive ? currentStep.color.split(' ')[2] : 'border-sage-soft';
 
   return (
-    <div id="breathing-exercise" className="bg-[#fcfaf5] border border-[#e6dfd5] rounded-3xl p-6 relative overflow-hidden flex flex-col items-center">
+    <div id="breathing-exercise" className="bg-warm border border-sage-soft rounded-3xl p-6 relative overflow-hidden flex flex-col items-center animate-none">
       <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center bg-transparent z-10">
-        <h3 className="font-sans font-medium text-[#4a3f35] tracking-tight text-lg flex items-center gap-2">
-          <Wind className="w-5 h-5 text-emerald-600 animate-pulse" />
+        <h3 className="font-sans font-medium text-earth-dark tracking-tight text-lg flex items-center gap-2">
+          <Wind className="w-5 h-5 text-sage animate-pulse" />
           Somatic Lung Breathing
         </h3>
         {totalCompleted > 0 && (
-          <span id="breathing-cycles-badge" className="text-xs font-sans text-emerald-800 font-medium px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-100 flex items-center gap-1">
+          <span id="breathing-cycles-badge" className="text-xs font-sans text-sage-dark font-medium px-2.5 py-1 bg-sage-pale rounded-full border border-sage-soft/60 flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {totalCompleted} {totalCompleted === 1 ? 'Cycle' : 'Cycles'} Done
           </span>
@@ -113,14 +113,14 @@ export default function BreathingExercise() {
       </div>
 
       {/* Select Pattern Tabs */}
-      <div className="flex gap-2 bg-[#f0eae1]/50 border border-[#e3dac9] p-1 rounded-xl mt-10 mb-8 w-full max-w-xs justify-center z-10">
+      <div className="flex gap-2 bg-cream border border-sage-soft/30 p-1 rounded-xl mt-10 mb-8 w-full max-w-xs justify-center z-10">
         <button
           id="btn-pattern-box"
           onClick={() => handlePatternChange('box')}
-          className={`flex-1 text-xs font-sans font-medium py-1.5 px-3 rounded-lg transition-all ${
+          className={`flex-1 text-xs font-sans font-medium py-1.5 px-3 rounded-lg transition-all cursor-pointer ${
             pattern === 'box' 
-              ? 'bg-[#8c6239] text-[#fdfbf7] shadow-sm' 
-              : 'text-[#6c5f54] hover:bg-[#ede6d9]'
+              ? 'bg-sage text-white shadow-xs font-bold' 
+              : 'text-earth-muted hover:bg-sage-pale/40'
           }`}
         >
           Box Breathing (4s Equal)
@@ -128,10 +128,10 @@ export default function BreathingExercise() {
         <button
           id="btn-pattern-478"
           onClick={() => handlePatternChange('478')}
-          className={`flex-1 text-xs font-sans font-medium py-1.5 px-3 rounded-lg transition-all ${
+          className={`flex-1 text-xs font-sans font-medium py-1.5 px-3 rounded-lg transition-all cursor-pointer ${
             pattern === '478' 
-              ? 'bg-[#8c6239] text-[#fdfbf7] shadow-sm' 
-              : 'text-[#6c5f54] hover:bg-[#ede6d9]'
+              ? 'bg-sage text-white shadow-xs font-bold' 
+              : 'text-earth-muted hover:bg-sage-pale/40'
           }`}
         >
           Grounding 4-7-8
@@ -174,8 +174,8 @@ export default function BreathingExercise() {
             duration: isActive ? currentStep.duration : 4,
             ease: "easeInOut"
           }}
-          className={`w-32 h-32 rounded-full flex flex-col items-center justify-center shadow-lg border border-white bg-gradient-to-tr ${
-            isActive ? 'from-amber-50 to-orange-50' : 'from-[#faf6f0] to-[#f4ece1]'
+          className={`w-32 h-32 rounded-full flex flex-col items-center justify-center shadow-md border border-white bg-gradient-to-tr ${
+            isActive ? 'from-sage-pale to-white' : 'from-warm to-cream'
           } z-10`}
         >
           <AnimatePresence mode="wait">
@@ -187,10 +187,10 @@ export default function BreathingExercise() {
                 exit={{ opacity: 0, y: -5 }}
                 className="text-center p-2"
               >
-                <div className="font-sans text-[11px] uppercase tracking-widest text-[#8c6239] font-semibold leading-none">
+                <div className="font-sans text-[11px] uppercase tracking-widest text-sage-dark font-black leading-none">
                   {currentStep.state.replace('_', ' ')}
                 </div>
-                <div className="font-mono text-3xl font-bold text-[#4a3f35] tabular-nums my-1">
+                <div className="font-mono text-3xl font-bold text-earth-dark tabular-nums my-1">
                   {timeLeft}s
                 </div>
               </motion.div>
@@ -201,8 +201,8 @@ export default function BreathingExercise() {
                 animate={{ opacity: 1 }}
                 className="text-center p-2"
               >
-                <Wind className="w-8 h-8 text-[#8c6239] mx-auto opacity-70 animate-bounce" />
-                <div className="font-sans text-xs text-[#6c5f54] font-medium leading-tight mt-1.5">
+                <Wind className="w-8 h-8 text-sage mx-auto opacity-70 animate-bounce" />
+                <div className="font-sans text-xs text-earth-muted font-bold leading-tight mt-1.5">
                   Tap below to<br/>begin breath
                 </div>
               </motion.div>
@@ -212,7 +212,7 @@ export default function BreathingExercise() {
       </div>
 
       <div className="text-center h-12 mt-4 max-w-sm px-4">
-        <p className="font-sans text-sm text-[#4a3f35] font-medium italic transition-all duration-300">
+        <p className="font-sans text-sm text-earth-dark font-medium italic transition-all duration-300">
           {isActive ? currentStep.text : "Prepare to take a slow, mindful breath together with Willow..."}
         </p>
       </div>
@@ -222,10 +222,10 @@ export default function BreathingExercise() {
         <button
           id="btn-breathing-toggle"
           onClick={handleToggle}
-          className={`flex items-center gap-2 font-sans font-medium text-sm py-2 px-6 rounded-2xl transition-all shadow-sm ${
+          className={`flex items-center gap-2 font-sans font-bold text-sm py-2 px-6 rounded-2xl transition-all shadow-sm cursor-pointer ${
             isActive 
-              ? 'bg-[#6c5f54] text-[#fdfbf7] hover:bg-[#5a4e44]' 
-              : 'bg-[#8c6239] text-[#fdfbf7] hover:bg-[#724f2d]'
+              ? 'bg-earth-muted text-white hover:bg-earth-dark' 
+              : 'bg-sage text-white hover:bg-sage-dark'
           }`}
         >
           {isActive ? (
@@ -244,7 +244,7 @@ export default function BreathingExercise() {
         <button
           id="btn-breathing-reset"
           onClick={handleReset}
-          className="flex items-center justify-center p-2.5 rounded-2xl bg-[#ede6d9] hover:bg-[#e4dac9] text-[#4a3f35] transition-all border border-[#ddcfbd]"
+          className="flex items-center justify-center p-2.5 rounded-2xl bg-cream hover:bg-sage-pale text-earth-dark transition-all border border-sage-soft/60 cursor-pointer"
           title="Reset tracker"
         >
           <RotateCcw className="w-4 h-4" />

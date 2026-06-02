@@ -61,9 +61,9 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
   const renderTrendSVG = () => {
     if (moodHistory.length === 0) {
       return (
-        <div id="mood-empty-chart" className="h-28 flex flex-col items-center justify-center border border-dashed border-[#e6dfd5] rounded-2xl bg-white/40">
-          <AlertCircle className="w-5 h-5 text-[#8c6239] opacity-40 mb-1" />
-          <span className="font-sans text-xs text-[#6c5f54] italic">Check in your mood below to display trendlines</span>
+        <div id="mood-empty-chart" className="h-28 flex flex-col items-center justify-center border border-dashed border-sage-soft/70 rounded-2xl bg-white/40">
+          <AlertCircle className="w-5 h-5 text-sage-dark opacity-40 mb-1 animate-pulse" />
+          <span className="font-sans text-xs text-earth-muted italic">Check in your mood below to display trendlines</span>
         </div>
       );
     }
@@ -87,13 +87,13 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
     }, '');
 
     return (
-      <div id="mood-trend-chart" className="bg-[#fdfbf6] p-4 rounded-2xl border border-[#ede6d9] relative shadow-sm">
+      <div id="mood-trend-chart" className="bg-warm p-4 rounded-2xl border border-sage-soft relative shadow-sm animate-none">
         <div className="flex justify-between items-center mb-2.5">
-          <span className="font-sans text-xs text-[#8c6239] font-medium uppercase tracking-wider flex items-center gap-1">
-            <Activity className="w-3.5 h-3.5" />
+          <span className="font-sans text-xs text-sage-dark font-black uppercase tracking-wider flex items-center gap-1">
+            <Activity className="w-3.5 h-3.5 text-sage" />
             Anxiety & Mood Trend ({recentScores.length} sessions)
           </span>
-          <span className="font-mono text-[10px] text-zinc-400">
+          <span className="font-mono text-[10px] text-earth-muted">
             Past readings
           </span>
         </div>
@@ -104,15 +104,15 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
             const y = height - paddingY - ((level - 1) / 4) * (height - 2 * paddingY);
             return (
               <g key={level}>
-                <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="#f0eae1" strokeWidth="1" strokeDasharray="3 3" />
-                <text x="5" y={y + 3} className="font-sans text-[8px] fill-[#8c6239] font-medium">{level === 5 ? 'Peace' : level === 3 ? 'Static' : 'Anxious'}</text>
+                <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="rgba(90, 143, 120, 0.18)" strokeWidth="1" strokeDasharray="3 3" />
+                <text x="5" y={y + 3} className="font-sans text-[8px] fill-sage-dark font-black">{level === 5 ? 'Peace' : level === 3 ? 'Static' : 'Anxious'}</text>
               </g>
             );
           })}
 
           {/* Connection Line */}
           {points.length > 1 && (
-            <path d={pathData} fill="none" stroke="#8c6239" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={pathData} fill="none" stroke="#5A8F78" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           )}
 
           {/* Points circles with Tooltip style score numbering */}
@@ -120,10 +120,10 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
             const score = recentScores[idx].score;
             return (
               <g key={idx}>
-                <circle cx={pt.x} cy={pt.y} r="5" fill="#fdfbf6" stroke="#8c6239" strokeWidth="2.5" />
-                <circle cx={pt.x} cy={pt.y} r="2" fill="#8c6239" />
-                <text x={pt.x} y={pt.y - 8} textAnchor="middle" className="font-mono text-[9px] fill-[#4a3f35] font-semibold">{score}</text>
-                <text x={pt.x} y={height - 4} textAnchor="middle" className="font-sans text-[7px] fill-zinc-400">
+                <circle cx={pt.x} cy={pt.y} r="5" fill="white" stroke="#5A8F78" strokeWidth="2.5" />
+                <circle cx={pt.x} cy={pt.y} r="2" fill="#3E7260" />
+                <text x={pt.x} y={pt.y - 8} textAnchor="middle" className="font-mono text-[9px] fill-earth-dark font-semibold">{score}</text>
+                <text x={pt.x} y={height - 4} textAnchor="middle" className="font-sans text-[7px] fill-earth-muted">
                   {new Date(recentScores[idx].timestamp).toLocaleDateString(undefined, {month: 'numeric', day: 'numeric'})}
                 </text>
               </g>
@@ -135,14 +135,14 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
   };
 
   return (
-    <div id="mood-tracker" className="bg-[#faf6f0] border border-[#e6dfd5] rounded-3xl p-6 relative overflow-hidden space-y-6">
+    <div id="mood-tracker" className="bg-warm border border-sage-soft rounded-3xl p-6 relative overflow-hidden space-y-6 animate-none">
       
       {/* Chart visualization */}
       {renderTrendSVG()}
 
-      <div className="border-t border-[#f0eae1] pt-4">
-        <h4 className="font-sans font-medium text-[#4a3f35] text-base mb-3 flex items-center gap-1.5">
-          <Calendar className="w-4.5 h-4.5 text-[#8c6239]" />
+      <div className="border-t border-sage-soft/30 pt-4">
+        <h4 className="font-sans font-medium text-earth-dark text-base mb-3 flex items-center gap-1.5">
+          <Calendar className="w-4.5 h-4.5 text-sage-dark" />
           Record Your Heartcheck
         </h4>
         
@@ -155,10 +155,10 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
                 id={`mood-score-${def.score}`}
                 key={def.score}
                 onClick={() => setSelectedScore(def.score)}
-                className={`p-2.5 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-300 ${
+                className={`p-2.5 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-300 cursor-pointer ${
                   isSelected 
-                    ? 'bg-[#8c6239] border-transparent text-[#fdfbf7] shadow-sm scale-102' 
-                    : `${def.color.split(' ')[0]} ${def.color.split(' ')[1]} hover:bg-white/50 text-[#6c5f54]`
+                    ? 'bg-sage border-transparent text-white shadow-sm scale-102 font-bold' 
+                    : `${def.color.split(' ')[0]} ${def.color.split(' ')[1]} hover:bg-white/50 text-earth-muted`
                 }`}
               >
                 <span className="text-xl">{def.label.split(' ')[0]}</span>
@@ -169,13 +169,13 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
         </div>
 
         {/* Selected Label Display */}
-        <div className="text-center font-sans font-semibold text-xs text-[#8c6239] mb-4 bg-white/50 py-1.5 px-3 rounded-xl border border-[#ede6d9]">
+        <div className="text-center font-sans font-semibold text-xs text-sage-dark mb-4 bg-white/50 py-1.5 px-3 rounded-xl border border-sage-soft/40">
           Current state: {MOODS_DEFN.find(d => d.score === selectedScore)?.label.substring(3)}
         </div>
 
         {/* Triggers list selector chips */}
         <div className="space-y-2">
-          <label className="font-sans text-xs text-[#6c5f54] font-medium">Identify any active stressors or triggers:</label>
+          <label className="font-sans text-xs text-earth-muted font-medium">Identify any active stressors or triggers:</label>
           <div className="flex flex-wrap gap-1.5">
             {PRESET_TRIGGERS.map((trig) => {
               const isSelected = selectedTriggers.includes(trig);
@@ -185,10 +185,10 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
                   key={trig}
                   type="button"
                   onClick={() => toggleTrigger(trig)}
-                  className={`text-xs font-sans py-1 px-2.5 rounded-full border transition-all ${
+                  className={`text-xs font-sans py-1 px-2.5 rounded-full border transition-all cursor-pointer ${
                     isSelected 
-                      ? 'bg-amber-100 text-amber-900 border-amber-300' 
-                      : 'bg-white/60 text-[#6c5f54] border-[#e6dfd5] hover:bg-white'
+                      ? 'bg-sage-soft text-sage-dark border-sage/40 font-bold' 
+                      : 'bg-white/60 text-earth-muted border-sage-soft hover:bg-sage-pale'
                   }`}
                 >
                   {trig}
@@ -205,12 +205,12 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
               placeholder="Add other stressor..."
               value={customTrigger}
               onChange={(e) => setCustomTrigger(e.target.value)}
-              className="bg-white border border-[#e6dfd5] rounded-xl text-xs py-1.5 px-3 flex-1 focus:outline-none focus:border-[#8c6239]"
+              className="bg-white border border-sage-soft/60 rounded-xl text-xs py-1.5 px-3 flex-1 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage-soft/40"
             />
             <button
               id="add-custom-trigger-btn"
               type="submit"
-              className="p-1 px-3 bg-[#ede6d9] hover:bg-[#e4dac9] text-xs font-sans font-medium text-[#4a3f35] rounded-xl border border-[#ddcfbd] flex items-center gap-1"
+              className="p-1 px-3 bg-cream hover:bg-sage-pale text-xs font-sans font-medium text-earth-dark rounded-xl border border-sage-soft/40 flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" /> Track
             </button>
@@ -219,14 +219,14 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
 
         {/* Notes Input */}
         <div className="space-y-1.5 mt-4">
-          <label className="font-sans text-xs text-[#6c5f54] font-medium">Notes & reflections (Willow will read these for context!):</label>
+          <label className="font-sans text-xs text-earth-muted font-medium">Notes & reflections (Willow will read these for context!):</label>
           <textarea
             id="mood-notes-textarea"
             placeholder="Write words about your feelings, physical sensations or situations causing stress..."
             rows={3}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full bg-white border border-[#e6dfd5] rounded-xl text-xs p-3 focus:outline-none focus:border-[#8c6239]"
+            className="w-full bg-white border border-sage-soft/80 rounded-xl text-xs p-3 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage-soft/40 text-earth-dark font-medium"
           />
         </div>
 
@@ -235,7 +235,7 @@ export default function MoodHistory({ moodHistory, onAddMood }: MoodHistoryProps
           id="submit-mood-btn"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full bg-[#8c6239] hover:bg-[#724f2d] text-[#fdfbf7] text-xs font-sans font-medium py-3 rounded-xl mt-4 transition-all shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+          className="w-full bg-sage hover:bg-sage-dark text-white text-xs font-sans font-bold py-3.5 rounded-xl mt-4 transition-all shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
         >
           <Sparkles className="w-4.5 h-4.5 fill-current" />
           {isSubmitting ? 'Recording & Synthesizing...' : 'Log Heartcheck & Inform Willow'}

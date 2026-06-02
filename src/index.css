@@ -1,9 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "DM Serif Display", serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-sage: #5A8F78;
+  --color-sage-dark: #3E7260;
+  --color-sage-soft: #D6EDE4;
+  --color-sage-pale: #EBF5EF;
+  
+  --color-ocean: #5A85A8;
+  --color-ocean-dark: #3E6A8C;
+  --color-ocean-soft: #D6E8F5;
+  --color-ocean-pale: #EBF3FA;
+
+  --color-cream: #F3F1EC;
+  --color-warm: #FDFBF7;
+  --color-earth-dark: #1A1E1C;
+  --color-earth-muted: #7A7870;
 }
 
 /* Hide standard horizontal scrollbar for clean visual alignment */
@@ -14,4 +30,5 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
 
