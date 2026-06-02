@@ -1,0 +1,6 @@
+{
+  "name": "Anxiety Companion",
+  "description": "A warm, memory-retaining AI companion that remembers your anxiety triggers, preferences, and progress to offer highly personalized conversation, mood tracking, and custom sound synthesis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
