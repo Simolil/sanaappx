@@ -10,6 +10,8 @@ import SynthSoundscape from './components/SynthSoundscape';
 import MoodHistory from './components/MoodHistory';
 import MemoryConsole from './components/MemoryConsole';
 
+import { CustomEmoji } from './components/CustomEmojis';
+
 const COMPANION_QUOTES = [
   "You showed up today — that alone is more than enough.",
   "This is your safe ground. Let yourself breathe.",
@@ -32,6 +34,8 @@ export default function App() {
   const [errorText, setErrorText] = useState<string | null>(null);
   const [newMemoriesAlert, setNewMemoriesAlert] = useState<Memory[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [bodySubTab, setBodySubTab] = useState<'breathing' | 'soundscapes'>('breathing');
+  const [selectedSoundProfile, setSelectedSoundProfile] = useState<'drone' | 'waves' | 'fireplace'>('drone');
 
   // Load the backend state on initial mount
   const fetchState = async () => {
@@ -98,7 +102,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: text }),
       });
-      if (!res.ok) throw new Error('Failed to transmit message to Willow');
+      if (!res.ok) throw new Error('Failed to transmit message to Sana');
       const data = await res.json();
       
       if (data.success) {
@@ -109,7 +113,7 @@ export default function App() {
         setState(data.state);
       }
     } catch (err: any) {
-      setErrorText('Willow is offline or busy. Let’s try again in a second.');
+      setErrorText('Sana is offline or busy. Let’s try again in a second.');
       // Revert the temporary user text if server transmission crashed
       fetchState();
     }
@@ -188,9 +192,9 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-transparent flex flex-col items-center justify-center p-6 text-center">
         <div className="w-10 h-10 border-4 border-sage border-t-transparent rounded-full animate-spin" />
-        <p className="font-sans text-xs text-sage-dark font-medium tracking-wide mt-4">Opening Willow’s Desk • Breathing deeply...</p>
+        <p className="font-sans text-xs text-sage-dark font-medium tracking-wide mt-4">Opening Sana’s Desk • Breathing deeply...</p>
       </div>
     );
   }
@@ -198,27 +202,27 @@ export default function App() {
   // Onboarding Screen logic
   if (state && !state.profile.onboardingCompleted) {
     return (
-      <div id="onboarding-container" className="min-h-screen bg-cream text-earth-dark flex items-center justify-center p-4">
+      <div id="onboarding-container" className="min-h-screen bg-transparent text-earth-dark flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="bg-warm border border-sage-soft w-full max-w-sm rounded-[32px] p-8 shadow-sm flex flex-col space-y-6"
+          className="glass-card w-full max-w-sm p-8 flex flex-col space-y-6"
         >
           {/* Introductory details */}
           <div className="text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-sage-soft to-sage-pale border border-sage-soft mx-auto flex items-center justify-center text-sage-dark shadow-none">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-100 to-amber-200 border border-amber-300 mx-auto flex items-center justify-center text-amber-700 shadow-md animate-pulse">
               <Heart className="w-5 h-5 fill-current" />
             </div>
             
             <h1 className="font-serif text-2xl font-bold tracking-tight text-earth-dark">
-              Meet Willow
+              Meet Sana
             </h1>
             <p className="font-sans text-xs text-earth-muted leading-relaxed">
-              Unlike static meditation timers (Calm, Headspace) or rigid CBT screens (Wysa, Woebot), <strong className="font-semibold text-sage-dark">Willow is a memory-retaining companion</strong>. 
+              Unlike static meditation timers (Calm, Headspace) or rigid CBT screens (Wysa, Woebot), <strong className="font-semibold text-sage-dark">Sana is a memory-retaining companion</strong>. 
             </p>
-            <p className="font-sans text-xs text-earth-muted/90 leading-relaxed bg-cream p-4 rounded-2xl border border-sage-soft/60">
-              As you chat naturally, Willow automatically logs your triggers, preferences, and personal stressors, continuously incorporating them to build a deep, trusted conversational relationship. You have full command of what she remembers.
+            <p className="font-sans text-xs text-earth-muted/90 leading-relaxed bg-white/20 p-4 rounded-2xl border border-white/30">
+              As you chat naturally, Sana automatically logs your triggers, preferences, and personal stressors, continuously incorporating them to build a deep, trusted conversational relationship. You have full command of what she remembers.
             </p>
           </div>
 
@@ -232,12 +236,12 @@ export default function App() {
                 value={onboardName}
                 onChange={(e) => setOnboardName(e.target.value)}
                 required
-                className="w-full bg-cream border border-sage-soft/60 rounded-2xl py-3 px-4 text-sm font-sans focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage-soft/50 font-medium text-earth-dark"
+                className="w-full glass-input rounded-2xl py-3 px-4 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-sage/20 font-medium text-earth-dark"
               />
             </div>
 
             {errorText && (
-              <div id="onboard-error-box" className="p-3.5 bg-rose-50 text-rose-950 font-medium font-sans text-xs rounded-2xl border border-rose-100 flex items-start gap-2">
+              <div id="onboard-error-box" className="p-3.5 bg-rose-50/75 backdrop-blur-sm text-rose-950 font-medium font-sans text-xs rounded-2xl border border-rose-100 flex items-start gap-2">
                 <AlertTriangle className="w-4.5 h-4.5 shrink-0 text-rose-700" />
                 <span>{errorText}</span>
               </div>
@@ -249,7 +253,7 @@ export default function App() {
               disabled={!onboardName.trim()}
               className="w-full bg-sage hover:bg-sage-dark text-white p-3.5 rounded-2xl text-xs font-bold font-sans transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              Step inside Haven
+              Step inside Sana
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -260,32 +264,38 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-cream text-earth-dark font-sans flex flex-col pb-24">
+    <div className={`bg-transparent text-earth-dark font-sans flex flex-col ${activeTab === 'chat' ? 'h-screen overflow-hidden' : 'min-h-screen pb-24'}`}>
       
       {/* Top Banner Bar */}
-      <header className="bg-warm border-b border-sage-soft/40 py-4 px-6 flex items-center justify-between sticky top-0 z-30 shadow-none">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🌙</span>
-          <h1 className="font-serif text-xl font-bold tracking-tight text-sage-dark flex items-center gap-1.5">
-            haven
-          </h1>
-        </div>
+      {activeTab !== 'chat' && (
+        <header className="bg-white/25 backdrop-blur-md border-b border-white/20 py-4 px-6 flex items-center justify-between sticky top-0 z-30 shadow-none">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🌙</span>
+            <h1 className="font-serif text-xl font-bold tracking-tight text-sage-dark flex items-center gap-1.5">
+              sana
+            </h1>
+          </div>
 
-        <button
-          id="btn-app-reset"
-          onClick={handleReset}
-          className="text-[10px] font-sans font-bold text-earth-muted bg-cream border border-sage-soft/40 hover:bg-sage-pale p-1.5 px-3 rounded-xl flex items-center gap-1 transition-all cursor-pointer animate-none"
-          title="Reset onboarding and delete memories database"
-        >
-          <RotateCcw className="w-3 h-3 text-sage-dark" /> Reset Haven
-        </button>
-      </header>
+          <button
+            id="btn-app-reset"
+            onClick={handleReset}
+            className="text-[10px] font-sans font-bold text-earth-muted bg-cream border border-sage-soft/40 hover:bg-sage-pale p-1.5 px-3 rounded-xl flex items-center gap-1 transition-all cursor-pointer animate-none"
+            title="Reset onboarding and delete memories database"
+          >
+            <RotateCcw className="w-3 h-3 text-sage-dark" /> Reset Sana
+          </button>
+        </header>
+      )}
 
       {/* Main Single Screen Layout Context */}
-      <main className="flex-1 w-full max-w-md mx-auto p-4 md:py-6 space-y-6">
+      <main className={`flex-1 w-full max-w-md mx-auto ${
+        activeTab === 'chat' 
+          ? 'flex flex-col overflow-hidden p-0' 
+          : 'p-4 md:py-6 space-y-6'
+      }`}>
         
         {errorText && (
-          <div id="app-error-banner" className="p-3 bg-rose-50 text-rose-950 font-sans text-xs rounded-2xl border border-rose-100 flex items-start gap-2 animate-bounce">
+          <div id="app-error-banner" className="p-3 bg-rose-50 text-rose-950 font-sans text-xs rounded-2xl border border-rose-100 flex items-start gap-2 animate-bounce shrink-0">
             <AlertTriangle className="w-4.5 h-4.5 text-rose-700 shrink-0" />
             <div className="flex-1">
               <span>{errorText}</span>
@@ -295,7 +305,7 @@ export default function App() {
         )}
 
         {/* Tab Swappers Panel Frame */}
-        <div className="relative">
+        <div className={`relative ${activeTab === 'chat' ? 'flex-1 flex flex-col overflow-hidden' : ''}`}>
           <AnimatePresence mode="wait">
             
             {/* HOME VIEW (Purely separated representation of greeting, cards and mood checks) */}
@@ -337,16 +347,18 @@ export default function App() {
                 >
                   
                   {/* Dynamic Beautiful Greeting Card */}
-                  <div className="relative overflow-hidden bg-sage text-white rounded-[28px] p-6 shadow-sm flex flex-col justify-between min-h-[180px]">
-                    <div className="absolute right-0 top-0 w-36 h-36 bg-white/5 rounded-full blur-xl -mr-12 -mt-12" />
-                    <div className="absolute left-1/3 bottom-0 w-24 h-24 bg-sage-dark/20 rounded-full blur-lg" />
-                    
+                  <div className="glass-card p-6 flex flex-col justify-between min-h-[160px] relative overflow-hidden">
+                    {/* Soft glowing ambient lighting layers in background */}
+                    <div className="absolute right-0 top-0 w-36 h-36 bg-sage/20 rounded-full blur-2xl -mr-12 -mt-12" />
+                    <div className="absolute left-1/3 bottom-0 w-24 h-24 bg-sage-soft/20 rounded-full blur-xl" />
+                    {/* Subtle warm sunny yellow glow circle/particle background detail */}
+                    <div className="absolute right-12 bottom-6 w-11 h-11 bg-gradient-to-tr from-[#FFE699]/35 to-amber-300/40 rounded-full blur-xs animate-pulse" />
                     <div className="relative z-10">
                       <div className="text-2xl mb-2">{partEmoji}</div>
-                      <div className="text-[10px] font-bold tracking-widest uppercase text-sage-soft/90 mb-1">
+                      <div className="text-[10px] font-bold tracking-widest uppercase text-earth-muted mb-1">
                         {partOfDay}
                       </div>
-                      <h2 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-white leading-snug">
+                      <h2 className="font-sans font-black text-2xl sm:text-3xl font-extrabold tracking-tight text-earth-dark leading-snug">
                         {rotatedQuote}
                       </h2>
                     </div>
@@ -354,13 +366,16 @@ export default function App() {
                     <div className="mt-5 flex gap-2 relative z-10">
                       <button
                         onClick={() => setActiveTab('chat')}
-                        className="bg-white hover:bg-sage-pale text-sage-dark font-sans font-bold text-xs px-4 py-2.5 rounded-full cursor-pointer transition-all shadow-xs flex items-center gap-1.5"
+                        className="bg-sage hover:bg-sage-dark text-white font-sans font-bold text-xs px-4 py-2.5 rounded-full cursor-pointer transition-all shadow-xs flex items-center gap-1.5"
                       >
-                        💬 Talk to Willow
+                        💬 Talk to Sana
                       </button>
                       <button
-                        onClick={() => setActiveTab('body')}
-                        className="bg-white/15 hover:bg-white/25 border border-white/20 text-white font-sans font-medium text-xs px-3.5 py-2.5 rounded-full cursor-pointer transition-all"
+                        onClick={() => {
+                          setActiveTab('body');
+                          setBodySubTab('breathing');
+                        }}
+                        className="bg-white/40 hover:bg-white/60 border border-white/50 text-earth-dark font-sans font-medium text-xs px-3.5 py-2.5 rounded-full cursor-pointer transition-all"
                       >
                         🌬️ Breathe
                       </button>
@@ -368,59 +383,63 @@ export default function App() {
                   </div>
 
                   {/* Immediate Heartcheck Grid Selector */}
-                  <div className="bg-white border border-sage-soft/50 p-5 rounded-[26px] shadow-sm animate-none">
+                  <div className="glass-card p-5">
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <span className="text-xs font-bold text-earth-dark flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-rose-400" />
                           How is your heart right now?
                         </span>
-                        <p className="text-[10px] text-earth-muted mt-0.5 font-sans font-medium">Willow adapts to whatever you register.</p>
+                        <p className="text-[10px] text-earth-muted mt-0.5 font-sans font-medium">Sana adapts to whatever you register.</p>
                       </div>
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-sage bg-sage-pale px-2.5 py-0.5 rounded-xl">
-                        Quick check
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100/60 border border-amber-200/50 px-2.5 py-0.5 rounded-xl flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        Quick Check
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-2.5">
+                    <div className="grid grid-cols-5 gap-2">
                       {[
-                        { val: 1, label: 'Low', emoji: '😔', color: 'hover:bg-rose-50 hover:border-rose-200 border-sage-soft/40 bg-warm/45 text-earth-dark font-sans' },
-                        { val: 2, label: 'Anxious', emoji: '😰', color: 'hover:bg-amber-50 hover:border-amber-200 border-sage-soft/40 bg-warm/45 text-earth-dark font-sans' },
-                        { val: 3, label: 'Tired', emoji: '🥱', color: 'hover:bg-sage-pale hover:border-sage-soft border-sage-soft/40 bg-warm/45 text-earth-dark font-sans' },
-                        { val: 4, label: 'Okay', emoji: '😌', color: 'hover:bg-sage-pale hover:border-sage border-sage-soft/40 bg-warm/45 text-earth-dark font-sans' },
-                        { val: 5, label: 'Good', emoji: '😊', color: 'hover:bg-sage-pale hover:border-sage-dark border-sage-soft/40 bg-warm/45 text-earth-dark font-sans' }
+                        { val: 1, label: 'Angry', color: 'hover:bg-rose-500/10 hover:border-rose-300 border-white/45 bg-white/25 text-earth-dark' },
+                        { val: 2, label: 'Worried', color: 'hover:bg-cyan-500/10 hover:border-cyan-300 border-white/45 bg-white/25 text-earth-dark' },
+                        { val: 3, label: 'Neutral', color: 'hover:bg-blue-500/10 hover:border-blue-300 border-white/45 bg-white/25 text-earth-dark' },
+                        { val: 4, label: 'Good', color: 'hover:bg-amber-400/20 hover:border-amber-300 border-white/45 bg-white/25 text-earth-dark ring-2 ring-amber-300/30' },
+                        { val: 5, label: 'Calm', color: 'hover:bg-emerald-500/10 hover:border-emerald-300 border-white/45 bg-white/25 text-earth-dark' }
                       ].map(m => (
                         <button
                           key={m.val}
                           onClick={() => handleMoodSelectAndReassure(m.val, m.label)}
-                          className={`flex flex-col items-center gap-1 p-2.5 border rounded-2xl transition-all hover:scale-102 active:scale-97 cursor-pointer bg-white ${m.color}`}
+                          className={`flex flex-col items-center gap-1.5 p-2 border rounded-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer ${m.color}`}
                         >
-                          <span className="text-xl">{m.emoji}</span>
-                          <span className="text-[9.5px] font-bold text-earth-muted tracking-tight">{m.label}</span>
+                          <CustomEmoji 
+                            score={m.val} 
+                            className="w-10 h-10 hover:rotate-3 transition-transform" 
+                          />
+                          <span className="text-[10px] font-bold text-earth-muted/90 tracking-tight">{m.label}</span>
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Dual-gradient "Willow remembers" Card */}
+                  {/* Dual-gradient "Sana remembers" Card */}
                   <div
                     onClick={() => setActiveTab('journal')}
-                    className="group cursor-pointer relative overflow-hidden bg-gradient-to-br from-ocean-dark to-sage text-white p-5 rounded-[26px] shadow-sm transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                    className="group cursor-pointer relative overflow-hidden bg-gradient-to-br from-sage/35 to-apricot-soft/15 backdrop-blur-md border border-white/50 p-5 rounded-[26px] shadow-sm transition-transform hover:scale-[1.01] active:scale-[0.99]"
                   >
                     <div className="absolute right-3 top-3 opacity-10">
                       <Brain className="w-14 h-14" />
                     </div>
                     <div className="flex items-center gap-1.5 mb-2.5">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-[#ffffff] bg-white/10 px-2.5 py-0.5 rounded-md">
-                        💭 Willow remembers
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-[#2C3A4E] bg-white/45 border border-white/40 px-2.5 py-0.5 rounded-md">
+                        💭 Sana remembers
                       </span>
                     </div>
-                    <p className="font-sans text-xs text-cream/90 leading-relaxed font-medium italic">
+                    <p className="font-sans text-xs text-earth-dark/90 leading-relaxed font-medium italic">
                       {latestMemory
                         ? `"${latestMemory.description}"`
                         : '"We haven’t mapped any stressors yet. Let’s talk inside the chat tab, and I will safely record key stressors to support you."'}
                     </p>
-                    <div className="mt-4 flex items-center justify-between text-[9px] text-sage-pale/80 font-bold tracking-widest uppercase">
+                    <div className="mt-4 flex items-center justify-between text-[9px] text-earth-muted font-bold tracking-widest uppercase">
                       <span>{listMemories.length} details logged securely</span>
                       <span className="group-hover:translate-x-1 transition-transform">Audit journal →</span>
                     </div>
@@ -431,43 +450,55 @@ export default function App() {
                     <h4 className="text-xs font-bold text-earth-dark px-1">Comforting Sound Presets</h4>
                     <div className="grid grid-cols-3 gap-3">
                       <div 
-                        onClick={() => { setActiveTab('body'); }}
-                        className="cursor-pointer bg-white border border-sage-soft/50 hover:bg-sage-pale/40 rounded-[22px] p-4 flex flex-col items-center gap-2 transition-all hover:scale-102"
+                        onClick={() => {
+                          setActiveTab('body');
+                          setBodySubTab('soundscapes');
+                          setSelectedSoundProfile('waves');
+                        }}
+                        className="cursor-pointer glass-card hover:bg-white/60 p-4 flex flex-col items-center gap-2 transition-all hover:scale-102"
                       >
-                        <div className="w-9 h-9 rounded-full bg-ocean-soft flex items-center justify-center text-lg">🌧️</div>
-                        <span className="text-[11px] font-bold text-earth-dark">Rain Synth</span>
-                        <span className="text-[9px] text-earth-muted tracking-wide">Steady, grounding</span>
+                        <div className="w-9 h-9 rounded-full bg-white/65 flex items-center justify-center text-lg">🌊</div>
+                        <span className="text-[11px] font-bold text-earth-dark text-center leading-tight">Ocean Waves</span>
+                        <span className="text-[9px] text-earth-muted tracking-wide text-center">Steady tide</span>
                       </div>
                       
                       <div 
-                        onClick={() => { setActiveTab('body'); }}
-                        className="cursor-pointer bg-white border border-sage-soft/50 hover:bg-sage-pale/40 rounded-[22px] p-4 flex flex-col items-center gap-2 transition-all hover:scale-102"
+                        onClick={() => {
+                          setActiveTab('body');
+                          setBodySubTab('soundscapes');
+                          setSelectedSoundProfile('fireplace');
+                        }}
+                        className="cursor-pointer glass-card hover:bg-white/60 p-4 flex flex-col items-center gap-2 transition-all hover:scale-102"
                       >
-                        <div className="w-9 h-9 rounded-full bg-sage-soft flex items-center justify-center text-lg">🌲</div>
-                        <span className="text-[11px] font-bold text-earth-dark">Forest Synth</span>
-                        <span className="text-[9px] text-earth-muted tracking-wide">Natural rustles</span>
+                        <div className="w-9 h-9 rounded-full bg-white/65 flex items-center justify-center text-lg">🔥</div>
+                        <span className="text-[11px] font-bold text-earth-dark text-center leading-tight">Kindling Hearth</span>
+                        <span className="text-[9px] text-earth-muted tracking-wide text-center">Cozy crackle</span>
                       </div>
 
                       <div 
-                        onClick={() => { setActiveTab('body'); }}
-                        className="cursor-pointer bg-white border border-sage-soft/50 hover:bg-sage-pale/40 rounded-[22px] p-4 flex flex-col items-center gap-2 transition-all hover:scale-102"
+                        onClick={() => {
+                          setActiveTab('body');
+                          setBodySubTab('soundscapes');
+                          setSelectedSoundProfile('drone');
+                        }}
+                        className="cursor-pointer glass-card hover:bg-white/60 p-4 flex flex-col items-center gap-2 transition-all hover:scale-102"
                       >
-                        <div className="w-9 h-9 rounded-full bg-[#f3e5f5] flex items-center justify-center text-lg">🎹</div>
-                        <span className="text-[11px] font-bold text-earth-dark">Space Drone</span>
-                        <span className="text-[9px] text-earth-muted tracking-wide">Slow harmony</span>
+                        <div className="w-9 h-9 rounded-full bg-white/65 flex items-center justify-center text-lg">🔮</div>
+                        <span className="text-[11px] font-bold text-earth-dark text-center leading-tight">Cosmic Slate</span>
+                        <span className="text-[9px] text-earth-muted tracking-wide text-center font-sans">Slow drone</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Home Streak and Weekly Trend bars */}
-                  <div className="bg-white border border-sage-soft/50 rounded-[26px] p-5 shadow-xs">
+                  <div className="glass-card p-5">
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm">🌱</span>
                         <span className="text-xs font-bold text-earth-dark">This week’s trend</span>
                       </div>
-                      <span className="text-[10px] text-earth-muted font-bold tracking-wide">
-                        Streak: {chartMoodData.filter(d => d.value > 0).length} check-ins
+                      <span className="inline-flex items-center gap-1 bg-amber-50 border border-amber-200/50 text-amber-700/90 px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-2xs">
+                        ⭐ Streak: {chartMoodData.filter(d => d.value > 0).length} check-ins
                       </span>
                     </div>
 
@@ -478,10 +509,10 @@ export default function App() {
                         const barColor = d.isToday 
                           ? 'bg-sage' 
                           : d.value >= 4 
-                            ? 'bg-sage-soft/90' 
+                            ? 'bg-sage/40' 
                             : hasValue 
-                              ? 'bg-ocean-soft' 
-                              : 'bg-sage-pale/30';
+                              ? 'bg-sage/30' 
+                              : 'bg-white/10';
 
                         return (
                           <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
@@ -512,12 +543,14 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-4"
+                className="flex-1 flex flex-col overflow-hidden"
               >
                 <ChatInterface
                   messages={state.messages}
                   newMemoriesAlert={newMemoriesAlert}
                   onSendMessage={handleSendMessage}
+                  onNavigate={(tab) => setActiveTab(tab)}
+                  onReset={handleReset}
                 />
               </motion.div>
             )}
@@ -529,10 +562,57 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-6"
+                className="space-y-5"
               >
-                <BreathingExercise />
-                <SynthSoundscape />
+                {/* Beautiful Sub-tab controller */}
+                <div id="somatic-tabs-selector" className="flex bg-white/20 border border-white/35 p-1 rounded-2xl w-full justify-center shadow-xs">
+                  <button
+                    id="sub-tab-breathing"
+                    onClick={() => setBodySubTab('breathing')}
+                    className={`flex-1 text-xs font-sans font-extrabold tracking-wide py-2.5 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      bodySubTab === 'breathing' 
+                        ? 'bg-sage text-white shadow-xs font-black' 
+                        : 'text-earth-muted hover:bg-white/35'
+                    }`}
+                  >
+                    <span>🌬️</span> Breathwork
+                  </button>
+                  <button
+                    id="sub-tab-soundscapes"
+                    onClick={() => setBodySubTab('soundscapes')}
+                    className={`flex-1 text-xs font-sans font-extrabold tracking-wide py-2.5 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      bodySubTab === 'soundscapes' 
+                        ? 'bg-sage text-white shadow-xs font-black' 
+                        : 'text-earth-muted hover:bg-white/35'
+                    }`}
+                  >
+                    <span>🎵</span> Ambient Sounds
+                  </button>
+                </div>
+
+                <AnimatePresence mode="wait">
+                  {bodySubTab === 'breathing' ? (
+                    <motion.div
+                      key="breathing-content"
+                      initial={{ opacity: 0, scale: 0.98, y: 5 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.98, y: -5 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <BreathingExercise />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="soundscapes-content"
+                      initial={{ opacity: 0, scale: 0.98, y: 5 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.98, y: -5 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <SynthSoundscape initialProfile={selectedSoundProfile} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
 
@@ -561,59 +641,65 @@ export default function App() {
       </main>
 
       {/* Floating Bottom Navigator for unified touch targets */}
-      <nav className="fixed bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full md:max-w-md mx-auto bg-white/95 backdrop-blur-lg border border-sage-soft/40 p-2 rounded-2xl flex justify-between items-center shadow-md z-40">
-        <button
-          id="nav-btn-home"
-          onClick={() => setActiveTab('home')}
-          className={`flex-1 flex flex-col items-center justify-center p-2 rounded-xl transition-all ${
-            activeTab === 'home' 
-              ? 'bg-sage text-white shadow-xs' 
-              : 'text-earth-muted hover:bg-sage-pale/40'
-          }`}
-        >
-          <span className="text-base leading-none mb-0.5">🌱</span>
-          <span className="font-sans text-[9px] uppercase tracking-wider font-extrabold">Home desk</span>
-        </button>
+      {activeTab !== 'chat' && (
+        <nav className="fixed bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full md:max-w-md mx-auto bg-white/35 backdrop-blur-xl border border-white/45 p-2 rounded-2xl flex justify-between items-center shadow-md z-40">
+          <button
+            id="nav-btn-home"
+            onClick={() => setActiveTab('home')}
+            className={`flex-1 flex flex-col items-center justify-center p-2 rounded-xl transition-all relative ${
+              activeTab === 'home' 
+                ? 'bg-sage text-white shadow-xs' 
+                : 'text-earth-muted/80 hover:bg-white/30'
+            }`}
+          >
+            <span className="text-base leading-none mb-0.5">🌱</span>
+            <span className="font-sans text-[9px] uppercase tracking-wider font-extrabold">Home desk</span>
+            {activeTab === 'home' && <span className="w-1 h-1 rounded-full bg-amber-300 mt-0.5 animate-pulse" />}
+          </button>
 
-        <button
-          id="nav-btn-chat"
-          onClick={() => setActiveTab('chat')}
-          className={`flex-1 flex flex-col items-center justify-center p-2 rounded-xl transition-all ${
-            activeTab === 'chat' 
-              ? 'bg-sage text-white shadow-xs' 
-              : 'text-earth-muted hover:bg-sage-pale/40'
-          }`}
-        >
-          <MessageCircle className="w-4.5 h-4.5 mb-1" />
-          <span className="font-sans text-[9px] uppercase tracking-wider font-extrabold">Talk Willow</span>
-        </button>
+          <button
+            id="nav-btn-chat"
+            onClick={() => setActiveTab('chat')}
+            className={`flex-1 flex flex-col items-center justify-center p-2 rounded-xl transition-all relative ${
+              activeTab === 'chat' 
+                ? 'bg-sage text-white shadow-xs' 
+                : 'text-earth-muted/80 hover:bg-white/30'
+            }`}
+          >
+            <MessageCircle className="w-4.5 h-4.5 mb-1" />
+            <span className="font-sans text-[9px] uppercase tracking-wider font-extrabold">Talk Sana</span>
+            {activeTab === 'chat' && <span className="w-1 h-1 rounded-full bg-amber-300 mt-0.5 animate-pulse" />}
+          </button>
 
-        <button
-          id="nav-btn-body"
-          onClick={() => setActiveTab('body')}
-          className={`flex-1 flex flex-col items-center justify-center p-2 rounded-xl transition-all ${
-            activeTab === 'body' 
-              ? 'bg-sage text-white shadow-xs' 
-              : 'text-earth-muted hover:bg-sage-pale/40'
-          }`}
-        >
-          <Heart className="w-4.5 h-4.5 mb-1" />
-          <span className="font-sans text-[9px] uppercase tracking-wider font-extrabold">Somatic Peace</span>
-        </button>
+          <button
+            id="nav-btn-body"
+            onClick={() => setActiveTab('body')}
+            className={`flex-1 flex flex-col items-center justify-center p-2 rounded-xl transition-all relative ${
+              activeTab === 'body' 
+                ? 'bg-sage text-white shadow-xs' 
+                : 'text-earth-muted/80 hover:bg-white/30'
+            }`}
+          >
+            <Heart className="w-4.5 h-4.5 mb-1" />
+            <span className="font-sans text-[9px] uppercase tracking-wider font-extrabold">Somatic Peace</span>
+            {activeTab === 'body' && <span className="w-1 h-1 rounded-full bg-amber-300 mt-0.5 animate-pulse" />}
+          </button>
 
-        <button
-          id="nav-btn-journal"
-          onClick={() => setActiveTab('journal')}
-          className={`flex-1 flex flex-col items-center justify-center p-2 rounded-xl transition-all ${
-            activeTab === 'journal' 
-              ? 'bg-sage text-white shadow-xs' 
-              : 'text-earth-muted hover:bg-sage-pale/40'
-          }`}
-        >
-          <BookOpen className="w-4.5 h-4.5 mb-1" />
-          <span className="font-sans text-[9px] uppercase tracking-wider font-extrabold">My Journals</span>
-        </button>
-      </nav>
+          <button
+            id="nav-btn-journal"
+            onClick={() => setActiveTab('journal')}
+            className={`flex-1 flex flex-col items-center justify-center p-2 rounded-xl transition-all relative ${
+              activeTab === 'journal' 
+                ? 'bg-sage text-white shadow-xs' 
+                : 'text-earth-muted/80 hover:bg-white/30'
+            }`}
+          >
+            <BookOpen className="w-4.5 h-4.5 mb-1" />
+            <span className="font-sans text-[9px] uppercase tracking-wider font-extrabold">My Journals</span>
+            {activeTab === 'journal' && <span className="w-1 h-1 rounded-full bg-amber-300 mt-0.5 animate-pulse" />}
+          </button>
+        </nav>
+      )}
 
     </div>
   );

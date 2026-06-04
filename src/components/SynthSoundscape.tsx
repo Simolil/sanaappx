@@ -36,9 +36,13 @@ const PROFILES: SoundProfileConfig[] = [
   }
 ];
 
-export default function SynthSoundscape() {
+interface SynthSoundscapeProps {
+  initialProfile?: SoundProfile;
+}
+
+export default function SynthSoundscape({ initialProfile }: SynthSoundscapeProps) {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [activeProfile, setActiveProfile] = useState<SoundProfile>('drone');
+  const [activeProfile, setActiveProfile] = useState<SoundProfile>(initialProfile || 'drone');
   const [volume, setVolume] = useState<number>(0.4);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -227,6 +231,13 @@ export default function SynthSoundscape() {
     }
   }, [activeProfile]);
 
+  // Sync state if initialProfile changes from props
+  useEffect(() => {
+    if (initialProfile) {
+      setActiveProfile(initialProfile);
+    }
+  }, [initialProfile]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -248,8 +259,8 @@ export default function SynthSoundscape() {
   };
 
   return (
-    <div id="synth-soundscape" className="bg-warm border border-sage-soft rounded-3xl p-6 select-none relative overflow-hidden backdrop-blur-md animate-none">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-sage-soft/10 rounded-full blur-2xl -mr-10 -mt-10" />
+    <div id="synth-soundscape" className="glass-card p-6 select-none relative overflow-hidden animate-none">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-sage/10 rounded-full blur-2xl -mr-10 -mt-10" />
       
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -268,10 +279,10 @@ export default function SynthSoundscape() {
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer ${
             isPlaying 
               ? 'bg-sage text-white hover:bg-sage-dark' 
-              : 'bg-sage-soft text-sage-dark hover:bg-sage-pale'
+              : 'bg-white/50 text-sage-dark hover:bg-white/85 border border-white/40'
           }`}
         >
-          {isPlaying ? <Square className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+          {isPlaying ? <Square className="w-5 h-5 fill-current animate-pulse" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
         </button>
       </div>
 
@@ -286,8 +297,8 @@ export default function SynthSoundscape() {
               onClick={() => setActiveProfile(profile.id)}
               className={`p-3 rounded-2xl border cursor-pointer transition-all duration-300 flex items-center gap-3.5 ${
                 isActive 
-                  ? 'bg-sage-soft/40 border-sage shadow-xs' 
-                  : 'bg-white hover:bg-sage-pale/45 border-sage-soft/20'
+                  ? 'bg-white/55 border-white/70 shadow-xs' 
+                  : 'bg-white/15 hover:bg-white/25 border-white/10'
               }`}
             >
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${profile.color} flex items-center justify-center text-sage-dark`}>
@@ -331,7 +342,7 @@ export default function SynthSoundscape() {
           value={volume}
           onChange={(e) => setVolume(parseFloat(e.target.value))}
           disabled={!isPlaying}
-          className="w-full accent-sage h-1 bg-sage-soft rounded-lg cursor-pointer transition-opacity duration-300 disabled:opacity-40"
+          className="w-full accent-sage h-1 bg-white/20 rounded-lg cursor-pointer transition-opacity duration-300 disabled:opacity-40"
         />
       </div>
     </div>

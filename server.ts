@@ -38,11 +38,11 @@ async function startServer() {
         onboardingCompleted: true,
       });
 
-      // Insert a warm introductory message from Willow
+      // Insert a warm introductory message from Sana
       const initialMessage: Message = {
         id: 'msg_init_' + Date.now(),
         role: 'model',
-        content: `Hi ${name.trim()}, it's so comforting to meet you. I'm Willow. I'm right here beside you. Here, you don't have to carry your stress or anxieties on your own. Whatever you choose to tell me, I'll hold onto it so we can talk through things at your pace. How is your heart doing today?`,
+        content: `Hi ${name.trim()}, it's so comforting to meet you. I'm Sana. I'm right here beside you. Here, you don't have to carry your stress or anxieties on your own. Whatever you choose to tell me, I'll hold onto it so we can talk through things at your pace. How is your heart doing today?`,
         timestamp: new Date().toISOString()
       };
       await db.addMessage(initialMessage);
@@ -97,27 +97,29 @@ async function startServer() {
       };
       await db.addMessage(modelMsg);
 
-      // 4. Background Memory extraction and persistence
-      let newlyExtracted: any[] = [];
-      try {
-        newlyExtracted = await extractNewMemories(content, replyText, userName);
-        for (const nm of newlyExtracted) {
-          await db.addMemory({
-            category: nm.category,
-            description: nm.description,
-          });
-        }
-      } catch (memError) {
-        console.warn("Skipped memory extraction background loop:", memError);
-      }
+      // 4. Background Memory extraction and persistence (run asynchronously to keep chat lightning-fast)
+      extractNewMemories(content, replyText, userName)
+        .then(async (newlyExtracted) => {
+          if (newlyExtracted && newlyExtracted.length > 0) {
+            for (const nm of newlyExtracted) {
+              await db.addMemory({
+                category: nm.category,
+                description: nm.description,
+              });
+            }
+          }
+        })
+        .catch((memError) => {
+          console.warn("Skipped background memory extraction:", memError);
+        });
 
-      // Fetch refreshed full state to return
+      // Fetch current state instantly
       const updatedState = await db.getState();
       res.json({
         success: true,
         reply: modelMsg,
-        newMemoriesCount: newlyExtracted.length,
-        newMemories: newlyExtracted,
+        newMemoriesCount: 0,
+        newMemories: [],
         state: updatedState
       });
     } catch (err: any) {
@@ -134,20 +136,24 @@ async function startServer() {
 
       const moodEntry = await db.addMood(score, notes || '', triggers || []);
       
-      // Auto-add triggers to user memories if described in notes
+      // Auto-add triggers to user memories if described in notes (runs non-blocking in background)
       if (notes && notes.trim() !== '') {
-        const state = await db.getState();
-        try {
-          const extracted = await extractNewMemories(`I checked in my mood with score ${score}. Notes: ${notes}`, `I see. Checking in details`, state.profile.name);
-          for (const nm of extracted) {
-            await db.addMemory({
-              category: nm.category,
-              description: nm.description,
+        db.getState().then((state) => {
+          extractNewMemories(`I checked in my mood with score ${score}. Notes: ${notes}`, `I see. Checking in details`, state.profile.name)
+            .then(async (extracted) => {
+              if (extracted && extracted.length > 0) {
+                for (const nm of extracted) {
+                  await db.addMemory({
+                    category: nm.category,
+                    description: nm.description,
+                  });
+                }
+              }
+            })
+            .catch((err) => {
+              console.warn("Could not auto-extract memories from mood notes in background:", err);
             });
-          }
-        } catch (err) {
-          console.warn("Could not auto-extract memories from mood notes", err);
-        }
+        });
       }
 
       const updatedState = await db.getState();

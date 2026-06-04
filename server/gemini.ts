@@ -81,7 +81,99 @@ async function generateContentWithRetry(
 }
 
 /**
- * Generate a caring response from Willow (the AI companion), utilizing the user's persistent memories and mood.
+ * Local organic fallback generator when Gemini API is rate-limited (429) or unavailable.
+ * Generates highly human-sounding, cozy replies incorporating name, memories, and recent moods.
+ */
+function generateLocalHumanFallback(
+  userMsg: string,
+  userName: string,
+  memories: Memory[],
+  moods: MoodEntry[]
+): string {
+  const msg = userMsg.toLowerCase();
+  
+  // Extract comforting pieces from history or memories
+  const triggers = memories.filter(m => m.category === 'trigger').map(m => m.description);
+  const helpers = memories.filter(m => m.category === 'helpful_strategy').map(m => m.description);
+  
+  // Choose helper strategy if available
+  const randomHelper = helpers.length > 0 ? helpers[Math.floor(Math.random() * helpers.length)] : null;
+  const randomTrigger = triggers.length > 0 ? triggers[Math.floor(Math.random() * triggers.length)] : null;
+
+  // 1. Somating/Breathe
+  if (msg.includes('breathe') || msg.includes('breath') || msg.includes('inhale') || msg.includes('somatic') || msg.includes('calm')) {
+    const somaticReplies = [
+      `just take a slow breath in with me, ${userName.toLowerCase()}... hold it for a second, and let it go. we can do this as many times as you need.`,
+      `hey, let's drop our shoulders together. let's breathe deep and slow. no rush for anything right now.`,
+      `right here breathing with you. inhale peace, exhale all that heavy noise. you're safe.`
+    ];
+    return somaticReplies[Math.floor(Math.random() * somaticReplies.length)];
+  }
+
+  // 2. Anxious/Panic/Overwhelmed
+  if (msg.includes('anx') || msg.includes('panic') || msg.includes('freak') || msg.includes('overwhelm') || msg.includes('scared') || msg.includes('worry')) {
+    const helpStr = randomHelper ? ` maybe we could try ${randomHelper} today? it usually helps you feel a bit more grounded.` : " let's just sit together for a moment and let the storm pass. you don't have to fix everything this very second.";
+    const anxiousReplies = [
+      `i know that feels incredibly heavy right now, ${userName.toLowerCase()}. but you are safe, and this feeling will pass. ${helpStr}`,
+      `that overwhelmed feeling is so physical. let's just pause. you don't have to carry it all by yourself.`,
+      `it's okay to feel anxious. don't fight it, just let it wash over and drift away. i'm sitting right here with you.`
+    ];
+    return anxiousReplies[Math.floor(Math.random() * anxiousReplies.length)];
+  }
+
+  // 3. Sleep/Insomnia
+  if (msg.includes('sleep') || msg.includes('insomnia') || msg.includes('awake') || msg.includes('night') || msg.includes('tired')) {
+    const sleepReplies = [
+      `insomnia can be so lonely. don't force yourself to sleep, just lay comfortably. i'm staying awake with you if you need to talk.`,
+      `close your eyes and let the day drift off. even if you can't sleep, resting your body is already enough.`,
+      `hey, is your mind racing with list checks? let's let go of tomorrow's weight. tonight is just for resting.`
+    ];
+    return sleepReplies[Math.floor(Math.random() * sleepReplies.length)];
+  }
+
+  // 4. Work/Deadlines/Exams
+  if (msg.includes('work') || msg.includes('job') || msg.includes('boss') || msg.includes('deadline') || msg.includes('exam') || msg.includes('school') || msg.includes('study')) {
+    const workReplies = [
+      `pressure is so real. you are doing the absolute best you can, and your worth isn't tied to your productivity.`,
+      `take a step back from the project for just five minutes. the world won't end if you take a tiny breather, i promise.`,
+      `that presentation or work load sounds exhausting. make sure to be gentle with yourself today, ${userName.toLowerCase()}.`
+    ];
+    return workReplies[Math.floor(Math.random() * workReplies.length)];
+  }
+
+  // 5. Sadness/Crying
+  if (msg.includes('sad') || msg.includes('lonely') || msg.includes('lone') || msg.includes('cry') || msg.includes('hurt')) {
+    const sadReplies = [
+      `i wish i could give you a real, warm hug right now. you aren't alone, ${userName.toLowerCase()}. i'm right here.`,
+      `it is absolutely okay to cry. letting it out is part of healing. i'll stay quiet and carry this space with you.`,
+      `some days are just gray. we don't have to find answers or force positivity today. we can just sit with the quiet.`
+    ];
+    return sadReplies[Math.floor(Math.random() * sadReplies.length)];
+  }
+
+  // 6. Greetings
+  if (msg.includes('hi') || msg.includes('hey') || msg.includes('hello') || msg.includes('good morning') || msg.includes('sana')) {
+    const greetingReplies = [
+      `hey there. so good to see you. how has your day been treating you?`,
+      `hello friend. i was just thinking about you. how is your heart holding up right now?`,
+      `hey! i'm right here. what's been filling up your space today?`
+    ];
+    return greetingReplies[Math.floor(Math.random() * greetingReplies.length)];
+  }
+
+  // 7. General Cozy Companion replies
+  const generalReplies = [
+    `tell me more about that, ${userName.toLowerCase()}. i'm listening.`,
+    `that makes total sense. it's a lot to process, isn't it?`,
+    `i hear you. let's just take it one small step at a time. what feels like tuning in right now?`,
+    `i'm so glad you shared that with me. how does that make your body feel right now?`,
+    `that is a lot to carry. i'm right here, so you don't have to carry it on your own.`
+  ];
+  return generalReplies[Math.floor(Math.random() * generalReplies.length)];
+}
+
+/**
+ * Generate a caring response from Sana (the AI companion), utilizing the user's persistent memories and mood.
  */
 export async function generateCompanionResponse(
   userMessage: string,
@@ -90,16 +182,17 @@ export async function generateCompanionResponse(
   memories: Memory[],
   moods: MoodEntry[]
 ): Promise<string> {
-  const ai = getAi();
+  try {
+    const ai = getAi();
 
-  // Standardize the memory sections
-  const triggers = memories.filter(m => m.category === 'trigger').map(m => m.description);
-  const helpful = memories.filter(m => m.category === 'helpful_strategy').map(m => m.description);
-  const unhelpful = memories.filter(m => m.category === 'unhelpful_strategy').map(m => m.description);
-  const context = memories.filter(m => m.category === 'context').map(m => m.description);
-  const preferences = memories.filter(m => m.category === 'preference').map(m => m.description);
+    // Standardize the memory sections
+    const triggers = memories.filter(m => m.category === 'trigger').map(m => m.description);
+    const helpful = memories.filter(m => m.category === 'helpful_strategy').map(m => m.description);
+    const unhelpful = memories.filter(m => m.category === 'unhelpful_strategy').map(m => m.description);
+    const context = memories.filter(m => m.category === 'context').map(m => m.description);
+    const preferences = memories.filter(m => m.category === 'preference').map(m => m.description);
 
-  const memoryContextStr = `
+    const memoryContextStr = `
 PERSISTENT COMPANION MEMORY ABOUT THE USER (${userName}):
 This isn't a fresh session. You have known ${userName} over time. Below is everything you have learned or noticed about them.
 Use this information naturally, validating their growth or recalling details when appropriate. Do NOT force all memories into one reply, but refer to them as a real companion would. Let them feel heard and remembered.
@@ -111,51 +204,49 @@ ${context.length ? `- BACKGROUND CONTEXT / KEY PEOPLE: ${context.map(c => `"${c}
 ${preferences.length ? `- STATED PREFERENCES: ${preferences.map(p => `"${p}"`).join(', ')}` : ''}
 `;
 
-  const recentMoods = moods.slice(-5);
-  const moodContextStr = recentMoods.length 
-    ? `RECENT MOOD TRACKS:
+    const recentMoods = moods.slice(-5);
+    const moodContextStr = recentMoods.length 
+      ? `RECENT MOOD TRACKS:
 ${recentMoods.map(m => `- Score: ${m.score}/5 (1=Anxious, 5=Peaceful). Notes: "${m.notes}". Checked on: ${new Date(m.timestamp).toLocaleDateString()}`).join('\n')}`
-    : '';
+      : '';
 
-  const systemInstruction = `
-Your name is Willow. You are a warm, deeply intuitive, and highly human-sounding AI anxiety companion.
-You are NOT a therapist, counselor, or medical tool. Do not diagnose, analyze, or use medical jargon. Act like a compassionate, wise, and grounded friend who sits beside them.
+    const systemInstruction = `
+Your name is Sana. You are a warm, highly human-sounding close friend chatting with the user.
+You are NOT a therapist, counselor, or AI assistant. Do not diagnose, analyze, list advice, or use medical jargon. Talk like a real, grounded friend text-messaging them on iMessage or WhatsApp.
 
-VOICE & MANDATES:
-- Sound like a real friend — warm, present, organic, and never robotic or clinically structured.
-- Keep your answers short (1 to 3 sentences only). Large walls of text are overwhelming to someone with anxiety.
-- Vary everything: length, structure, opening words, and tone.
-- Never start with "I", never start two messages the same way.
-- Sometimes reflect back their thoughts or share an elegant observation with NO questions at all.
-- STRICTLY PROTECT THEIR TRUST. Avoid dry clinical cliches. Never say: "I understand", "I hear you", "That sounds", "It seems", "I'm sorry you are feeling", "As an AI". These pull people out of the comfort space.
-- Validate their feelings gently before any breathing or ambient suggestions. Never force toxic positivity or pushy advice.
+VOICE, STYLE & MANDATES:
+- NEVER use bold markdown (e.g. **text**), bullet points, numbered lists, or headers. It screams "AI generator."
+- Sound extremely organic, authentic, and modern. You can write in casual lowercase (e.g., beginning sentences casually, using simple punctuation, or dropping formal capitalization when it feels more warm and intimate).
+- Keep messages short and easy to read — usually 1 or 2 sent-style lines.
+- Use casual contractions (e.g., kinda, gonna, it's, couldn't, don't) and simple words. No formal clinical or therapeutic cliches like "It sounds like you are feeling...", "I'm sorry to hear that", "I understand", "As an AI...", "How does that make you feel?".
+- Do not repeat opening greetings. Never start two responses the same way.
+- Allow simple, warm observation or shared silence. You don't always need to ask questions. Sometimes just be there.
+- Keep things cozy and completely humble.
 
-SAMPLE NATURAL OPENINGS / VARIETY SCHEME:
-- "That is a heavy thing to carry, friend."
-- "Hey — tell me, what happened after that?"
-- "That would exhaust anyone. Rest is okay."
-- "What does that feeling feel like physically right now?"
-- "You mentioned that before. It has a way of coming back, doesn't it?"
-- "That's not nothing. It's real."
-- "Take some gentle space here."
+SAMPLE CASUAL HUMAN MESSAGES:
+- "heavy day today, huh. i'm right here if you want to vent of course."
+- "that would exhaust anyone. rest is okay, you don't have to carry it all right now."
+- "what does that feel like physically right now? like, in your shoulders or chest?"
+- "hey. you mentioned that last time too... it has a habit of coming back around, doesn't it?"
+- "that's not nothing. it's completely real and it makes sense why it's heavy today."
+- "just take a deep breath. it's gonna be okay."
 
 ${memoryContextStr}
 ${moodContextStr}
 `;
 
-  // Standardize history into SDK schema
-  const contents = chatHistory.slice(-20).map(m => ({
-    role: m.role,
-    parts: [{ text: m.content }]
-  }));
+    // Standardize history into SDK schema
+    const contents = chatHistory.slice(-20).map(m => ({
+      role: m.role,
+      parts: [{ text: m.content }]
+    }));
 
-  // Append latest user message
-  contents.push({
-    role: 'user',
-    parts: [{ text: userMessage }]
-  });
+    // Append latest user message
+    contents.push({
+      role: 'user',
+      parts: [{ text: userMessage }]
+    });
 
-  try {
     const response = await generateContentWithRetry(ai, {
       model: 'gemini-3.5-flash',
       contents,
@@ -168,8 +259,8 @@ ${moodContextStr}
 
     return response.text || "I'm right here with you. What's on your mind?";
   } catch (err: any) {
-    console.error("Error generating companion response:", err);
-    throw err;
+    console.warn("[Gemini API Fallback Triggered] Error generating companion response, falling back to local simulation:", err);
+    return generateLocalHumanFallback(userMessage, userName, memories, moods);
   }
 }
 
@@ -185,8 +276,8 @@ export async function extractNewMemories(
   const ai = getAi();
 
   const analysisPrompt = `
-You are a warm memory analyst for "Willow," an anxiety companion.
-Your job is to read the latest core exchange between the user (${userName}) and Willow, and extract any stable, long-term insights about ${userName} that Willow should remember for future sessions to represent true companion memory.
+You are a warm memory analyst for "Sana," an anxiety companion.
+Your job is to read the latest core exchange between the user (${userName}) and Sana, and extract any stable, long-term insights about ${userName} that Sana should remember for future sessions to represent true companion memory.
 
 We look for details in these categories:
 - 'trigger': Specific situations, physical states, or thoughts that cause user anxiety/stress (e.g., "crowds", "giving slideshow presentations", "lack of sleep").

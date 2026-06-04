@@ -1,5 +1,5 @@
 /**
- * Shared Type Definitions for Haven - AI Anxiety Companion
+ * Shared Type Definitions for Sana - AI Anxiety Companion
  */
 
 export type MemoryCategory = 'trigger' | 'helpful_strategy' | 'unhelpful_strategy' | 'context' | 'preference';

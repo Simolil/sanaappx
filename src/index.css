@@ -1,25 +1,92 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=DM+Serif+Display&family=Nunito:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "DM Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "DM Serif Display", serif;
+  --font-sans: "Quicksand", "Nunito", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Lora", "DM Serif Display", serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --color-sage: #5A8F78;
-  --color-sage-dark: #3E7260;
-  --color-sage-soft: #D6EDE4;
-  --color-sage-pale: #EBF5EF;
+  --color-sage: #8FADD6;        /* Beautiful pastel sky lavender/blue */
+  --color-sage-dark: #2F3E52;   /* Elegant mellow slate charcoal */
+  --color-sage-soft: rgba(255, 255, 255, 0.45); 
+  --color-sage-pale: rgba(255, 255, 255, 0.3); 
   
-  --color-ocean: #5A85A8;
-  --color-ocean-dark: #3E6A8C;
-  --color-ocean-soft: #D6E8F5;
-  --color-ocean-pale: #EBF3FA;
+  --color-apricot: #F5975A;     /* Mellow pastel apricot */
+  --color-apricot-dark: #C6621F;/* Readable soft terracotta */
+  --color-apricot-soft: #FFF0E1;/* Warm, light-glowing comforting peach */
+  --color-apricot-pale: #FFF7F1;
 
-  --color-cream: #F3F1EC;
-  --color-warm: #FDFBF7;
-  --color-earth-dark: #1A1E1C;
-  --color-earth-muted: #7A7870;
+  --color-ocean: #8FADD6;
+  --color-ocean-dark: #2F3E52;
+  --color-ocean-soft: rgba(255, 255, 255, 0.4);
+  --color-ocean-pale: rgba(255, 255, 255, 0.25);
+
+  --color-cream: #F5F8FC;
+  --color-warm: rgba(255, 255, 255, 0.55);
+  --color-earth-dark: #2F3E52;   /* Mellow Blue Slate */
+  --color-earth-muted: #5D728E;  /* Airy Muted Slate */
+}
+
+/* 3 Core Rules for Anxiety App Typography & Direction 2 Backdrop */
+html, body {
+  background: linear-gradient(135deg, #e5ecf9 0%, #dbe5f5 100%) !important;
+  background-attachment: fixed !important;
+  color: #2F3E52 !important;            /* Universal deep sage slate text */
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+html, body, button, input, textarea, select, option, p, span, div, label, li, a {
+  font-family: "Quicksand", "Nunito", "Inter", system-ui, -apple-system, sans-serif !important;
+  color: inherit;
+  letter-spacing: 0.04em !important;    /* Extra letter-spacing as requested for visual room */
+  line-height: 1.8 !important;         /* Generous line-height for visual relief */
+}
+
+/* Ensure serifs for quotes, display titles or guided imagery */
+h1, h2, h3, h4, h5, h6, .font-serif, .serif-prompt {
+  font-family: "Lora", "DM Serif Display", Georgia, serif !important;
+  color: inherit;
+  letter-spacing: -0.01em !important;
+  line-height: 1.4 !important;
+}
+
+/* Keep JetBrains Mono for clean system-checks or metrics */
+.font-mono, code, pre {
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.5 !important;
+}
+
+/* Frosted glass container cards conforming to the ethereal theme */
+.glass-card {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 26px !important;
+  box-shadow: 0 8px 32px 0 rgba(44, 58, 78, 0.03) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 0 12px 40px 0 rgba(44, 58, 78, 0.05) !important;
+}
+
+/* Glass Input Fields */
+.glass-input {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  color: #37475d !important;
+}
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.65) !important;
+  border-color: var(--color-sage) !important;
+  box-shadow: 0 0 0 2px rgba(134, 206, 170, 0.3) !important;
 }
 
 /* Hide standard horizontal scrollbar for clean visual alignment */

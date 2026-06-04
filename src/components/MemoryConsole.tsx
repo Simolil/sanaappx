@@ -11,37 +11,37 @@ interface MemoryConsoleProps {
 const CATEGORY_MAP: Record<MemoryCategory, { label: string; bg: string; text: string; border: string; emoji: string }> = {
   trigger: {
     label: 'My Stressors & Triggers',
-    bg: 'bg-warm',
+    bg: 'bg-white/30',
     text: 'text-earth-dark',
-    border: 'border-sage-soft',
+    border: 'border-white/40',
     emoji: '⚠️'
   },
   helpful_strategy: {
     label: 'What Softens My Fear',
-    bg: 'bg-sage-pale',
+    bg: 'bg-white/40',
     text: 'text-sage-dark',
-    border: 'border-sage-soft/40',
+    border: 'border-white/50',
     emoji: '🌿'
   },
   unhelpful_strategy: {
     label: 'What Does Not Help',
-    bg: 'bg-cream/40',
+    bg: 'bg-white/10',
     text: 'text-earth-muted',
-    border: 'border-sage-soft/30',
+    border: 'border-white/20',
     emoji: '🛑'
   },
   context: {
     label: 'Life Context & Key People',
-    bg: 'bg-ocean-soft/10',
-    text: 'text-ocean-dark',
-    border: 'border-ocean-soft/30',
+    bg: 'bg-white/25',
+    text: 'text-earth-dark',
+    border: 'border-white/35',
     emoji: '🏡'
   },
   preference: {
-    label: 'Willow Style Preferences',
-    bg: 'bg-sage-soft/20',
+    label: 'Sana Style Preferences',
+    bg: 'bg-white/35',
     text: 'text-sage-dark',
-    border: 'border-sage-soft/30',
+    border: 'border-white/40',
     emoji: '💬'
   }
 };
@@ -81,34 +81,34 @@ export default function MemoryConsole({ memories, onDeleteMemory }: MemoryConsol
   const grouped = groupMemories();
 
   return (
-    <div id="memory-console" className="bg-warm border border-sage-soft rounded-3xl p-6 relative overflow-hidden space-y-6 animate-none">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-sage-soft/15 rounded-full blur-2xl -mr-10 -mt-10" />
+    <div id="memory-console" className="glass-card p-6 relative overflow-hidden space-y-6 animate-none">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-sage/10 rounded-full blur-2xl -mr-10 -mt-10" />
       
       <div>
         <h3 className="font-sans font-medium text-earth-dark tracking-tight text-lg flex items-center gap-2">
           <Brain className="w-5 h-5 text-sage-dark animate-pulse" />
-          Willow's Personal Journals
+          Sana's Personal Journals
         </h3>
         <p className="font-sans text-xs text-earth-muted mt-0.5">
-          Unlike static clinical utilities, Willow listens and retains memories about you to support you organically with continuous recall.
+          Unlike static clinical utilities, Sana listens and retains memories about you to support you organically with continuous recall.
         </p>
       </div>
 
       {/* Trust & Transparency Consent Banner */}
-      <div id="memory-concept-notice" className="p-3.5 bg-sage-pale border border-sage-soft/30 rounded-2xl flex gap-3 text-xs text-earth-dark font-sans leading-relaxed">
+      <div id="memory-concept-notice" className="p-3.5 bg-white/20 border border-white/30 rounded-2xl flex gap-3 text-xs text-earth-dark font-sans leading-relaxed">
         <ShieldCheck className="w-5 h-5 text-sage shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold text-earth-dark">Sovereign Data Storage:</span> You hold full control over your background memories. If Willow records something inaccurate, or if a trigger changes, click the trash icon below to erase it instantly.
+          <span className="font-bold text-earth-dark">Sovereign Data Storage:</span> You hold full control over your background memories. If Sana records something inaccurate, or if a trigger changes, click the trash icon below to erase it instantly.
         </div>
       </div>
 
       <div className="space-y-4">
         {memories.length === 0 ? (
-          <div id="no-memories-empty" className="h-40 flex flex-col items-center justify-center border border-dashed border-sage-soft rounded-2xl bg-white/40">
-            <Heart className="w-5 h-5 text-sage-dark opacity-40 mb-1.5 animate-bounce" />
+          <div id="no-memories-empty" className="h-40 flex flex-col items-center justify-center border border-dashed border-white/45 rounded-2xl bg-white/20">
+            <Heart className="w-5 h-5 text-sage-dark opacity-44 mb-1.5 animate-bounce" />
             <span className="font-sans text-xs text-earth-muted text-center px-4 leading-relaxed">
-              Willow has not recorded any details yet.<br/>
-              <span className="text-[11px] text-sage-dark font-medium">As you chat naturally about what upsets you, what calms you down, or who resides in your life, Willow will remember details!</span>
+              Sana has not recorded any details yet.<br/>
+              <span className="text-[11px] text-sage-dark font-medium">As you chat naturally about what upsets you, what calms you down, or who resides in your life, Sana will remember details!</span>
             </span>
           </div>
         ) : (
