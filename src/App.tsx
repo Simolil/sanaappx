@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageCircle, Heart, BookOpen, RotateCcw, AlertTriangle, ArrowRight, Brain, Sparkles, Sliders } from 'lucide-react';
-import { CompanionState, Message, Memory, MoodEntry } from './types';
+import { CompanionState, Message, Memory, MoodEntry, MemoryCategory } from './types';
 
 // Importing Custom Sub-components
 import ChatInterface from './components/ChatInterface';
@@ -27,6 +27,93 @@ const COMPANION_QUOTES = [
   "Something peaceful is still possible for you today."
 ];
 
+// Personal Smart Simulator for Offline/Static environments like GitHub Pages
+function getLocalSanaResponse(userMessageText: string, name: string, memories: Memory[], moodHistory: MoodEntry[]): { reply: string, newMemories: Memory[] } {
+  const text = userMessageText.toLowerCase().trim();
+  let reply = "";
+  let newMemories: Memory[] = [];
+
+  // Analyze triggers and context
+  const hasPanic = text.includes("panic") || text.includes("can't breathe") || text.includes("scared");
+  const hasWork = text.includes("work") || text.includes("job") || text.includes("boss") || text.includes("career");
+  const hasSleep = text.includes("sleep") || text.includes("night") || text.includes("tired");
+  const hasSocial = text.includes("people") || text.includes("social") || text.includes("crowd") || text.includes("friend");
+
+  if (hasPanic) {
+    const exists = memories.some(m => m.description.includes("Panic"));
+    if (!exists) {
+      newMemories.push({
+        id: 'mem_local_' + Math.random().toString(36).substring(2, 9),
+        category: 'trigger',
+        description: 'Sudden high anxiety or panic episodes',
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      });
+    }
+  }
+  if (hasWork) {
+    const exists = memories.some(m => m.description.includes("Work"));
+    if (!exists) {
+      newMemories.push({
+        id: 'mem_local_' + Math.random().toString(36).substring(2, 9),
+        category: 'trigger',
+        description: 'Workplace pressures and professional performance',
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      });
+    }
+  }
+  if (hasSleep) {
+    const exists = memories.some(m => m.description.includes("sleep"));
+    if (!exists) {
+      newMemories.push({
+        id: 'mem_local_' + Math.random().toString(36).substring(2, 9),
+        category: 'trigger',
+        description: 'Sleep disruptions and nighttime overthinking',
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      });
+    }
+  }
+  if (hasSocial) {
+    const exists = memories.some(m => m.description.includes("Social"));
+    if (!exists) {
+      newMemories.push({
+        id: 'mem_local_' + Math.random().toString(36).substring(2, 9),
+        category: 'trigger',
+        description: 'Social situations and interpersonal worries',
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      });
+    }
+  }
+
+  // Pick suitable response
+  if (hasPanic) {
+    reply = `Please drop your shoulders, ${name}. I'm right here beside you. You are in no immediate danger, and this feeling will pass. Let's practice a slow breath: breathe in with me... hold... and release. You are completely safe.`;
+  } else if (text.includes("hello") || text.includes("hi ") || text.includes("hey") || text.includes("meet")) {
+    reply = `Hello ${name}! It feels so calming to greet you here. This is our quiet space. How are you carrying yourself right now?`;
+  } else if (text.includes("breathe") || text.includes("how to breathe")) {
+    reply = `Let's take a slow breath together, ${name}. Try using the Somatic Peace tab below to access my rhythmic guide or ambient sounds. Breathing slowly is the quickest way to calm our nervous system.`;
+  } else if (text.includes("sad") || text.includes("cry") || text.includes("depressed")) {
+    reply = `I can feel how raw and heavy this is for you, ${name}. It is completely valid to feel sad or overwhelmed. You do not have to put on a strong face here. I am keeping you company.`;
+  } else if (hasWork) {
+    reply = `Your work is taking a huge toll on you, ${name}. It's understandable to feel squeezed by modern workloads. Let's give ourselves permission to put the worries down for just a moment. Your peace comes first.`;
+  } else if (hasSleep) {
+    reply = `Nighttime holds a mirror to our worries, making everything seem louder, ${name}. Let's turn off the demands. I'm right here holding watch, so you are allowed to rest your mind.`;
+  } else {
+    const genericPrompts = [
+      `I'm listening closely, ${name}. Anxious thoughts can be so loud, but they are just waves passing over the surface. We can stay anchored here together.`,
+      `Thank you for trusting me with this, ${name}. I am keeping this safely logged in our journals so we don't forget how strong you've been. What is one small step that would feel gentlest for you?`,
+      `I can hear how much energy you're spending to stay afloat, ${name}. You are allowed to be tired. You are allowed to take a break. Let's just sit in quiet peace for a moment.`,
+      `I hear you, ${name}. We can handle this one breath, one step, one moment at a time. Tell me more, or we can simply rest.`
+    ];
+    reply = genericPrompts[Math.floor(Math.random() * genericPrompts.length)];
+  }
+
+  return { reply, newMemories };
+}
+
 export default function App() {
   const [state, setState] = useState<CompanionState | null>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'chat' | 'body' | 'journal'>('home');
@@ -36,6 +123,28 @@ export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [bodySubTab, setBodySubTab] = useState<'breathing' | 'soundscapes'>('breathing');
   const [selectedSoundProfile, setSelectedSoundProfile] = useState<'drone' | 'waves' | 'fireplace'>('drone');
+  const [isClientSide, setIsClientSide] = useState<boolean>(false);
+
+  // Initialize a default client side state
+  const initializeLocalState = () => {
+    const defaultState: CompanionState = {
+      profile: {
+        name: '',
+        onboardingCompleted: false,
+        createdAt: new Date().toISOString()
+      },
+      messages: [],
+      memories: [],
+      moodHistory: []
+    };
+    setState(defaultState);
+    localStorage.setItem('sana_local_state', JSON.stringify(defaultState));
+  };
+
+  const saveLocalState = (newState: CompanionState) => {
+    setState(newState);
+    localStorage.setItem('sana_local_state', JSON.stringify(newState));
+  };
 
   // Load the backend state on initial mount
   const fetchState = async () => {
@@ -45,9 +154,21 @@ export default function App() {
       if (!res.ok) throw new Error('Failed to retrieve companion state');
       const data = await res.json();
       setState(data);
+      setIsClientSide(false);
     } catch (err: any) {
-      console.error(err);
-      setErrorText('Could not connect to the companion server. Make sure the server is booted and valid.');
+      console.warn("Sana Server unreachable, falling back to fully-featured browser storage mode:", err);
+      setIsClientSide(true);
+      
+      const localData = localStorage.getItem('sana_local_state');
+      if (localData) {
+        try {
+          setState(JSON.parse(localData));
+        } catch {
+          initializeLocalState();
+        }
+      } else {
+        initializeLocalState();
+      }
     } finally {
       setIsLoading(false);
     }
@@ -61,6 +182,29 @@ export default function App() {
   const handleOnboard = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!onboardName.trim()) return;
+
+    if (isClientSide) {
+      const name = onboardName.trim();
+      const initialMessage: Message = {
+        id: 'msg_init_' + Date.now(),
+        role: 'model',
+        content: `Hi ${name}, it's so comforting to meet you. I'm Sana. I'm right here beside you. Here, you don't have to carry your stress or anxieties on your own. Whatever you choose to tell me, I'll hold onto it so we can talk through things at your pace. How is your heart doing today?`,
+        timestamp: new Date().toISOString()
+      };
+      const newState: CompanionState = {
+        profile: {
+          name,
+          onboardingCompleted: true,
+          createdAt: new Date().toISOString()
+        },
+        messages: [initialMessage],
+        memories: [],
+        moodHistory: []
+      };
+      saveLocalState(newState);
+      return;
+    }
+
     try {
       setErrorText(null);
       const res = await fetch('/api/companion/onboard', {
@@ -90,6 +234,47 @@ export default function App() {
       content: text,
       timestamp: new Date().toISOString()
     };
+
+    const updatedMessages = [...state.messages, localUserMsg];
+
+    if (isClientSide) {
+      // 1. Instantly append user's message
+      const stateWithUserMsg = {
+        ...state,
+        messages: updatedMessages
+      };
+      saveLocalState(stateWithUserMsg);
+
+      // 2. Simulate Sana typing briefly with subtle timing
+      setTimeout(() => {
+        const resolution = getLocalSanaResponse(
+          text,
+          state.profile.name,
+          state.memories,
+          state.moodHistory
+        );
+
+        const modelMsg: Message = {
+          id: 'msg_m_' + Date.now(),
+          role: 'model',
+          content: resolution.reply,
+          timestamp: new Date().toISOString()
+        };
+
+        const finalState: CompanionState = {
+          ...stateWithUserMsg,
+          messages: [...updatedMessages, modelMsg],
+          memories: [...stateWithUserMsg.memories, ...resolution.newMemories]
+        };
+
+        if (resolution.newMemories.length > 0) {
+          setNewMemoriesAlert(resolution.newMemories);
+        }
+        saveLocalState(finalState);
+      }, 1000);
+
+      return;
+    }
 
     setState(prev => prev ? {
       ...prev,
@@ -121,6 +306,58 @@ export default function App() {
 
   // Record a Mood Entry check-in
   const handleAddMood = async (score: number, notes: string, triggers: string[]) => {
+    if (isClientSide && state) {
+      const newEntry: MoodEntry = {
+        id: 'mood_local_' + Date.now(),
+        score,
+        notes: notes || '',
+        triggers: triggers || [],
+        timestamp: new Date().toISOString()
+      };
+      
+      // Auto-extract trigger details locally if notes exists
+      let autoMemories: Memory[] = [];
+      if (notes && notes.trim() !== '') {
+        const text = notes.toLowerCase();
+        let triggerDesc = "";
+        let triggerCat: MemoryCategory = "trigger";
+
+        if (text.includes("work") || text.includes("job") || text.includes("boss")) {
+          triggerDesc = "Workplace performance notes";
+        } else if (text.includes("family") || text.includes("people") || text.includes("interaction")) {
+          triggerDesc = "Social interaction patterns";
+        } else if (text.includes("sleep") || text.includes("night") || text.includes("tired")) {
+          triggerDesc = "Irregular sleep patterns";
+        } else if (text.includes("health")) {
+          triggerDesc = "Physical health stressors";
+        } else if (text.includes("breathe") || text.includes("walking") || text.includes("exercise")) {
+          triggerDesc = "Going for a walk or deep breathing";
+          triggerCat = "helpful_strategy";
+        } else {
+          triggerDesc = "Situational anxiety logs";
+        }
+
+        const exists = state.memories.some(m => m.description === triggerDesc);
+        if (!exists) {
+          autoMemories.push({
+            id: 'mem_local_' + Math.random().toString(36).substring(2, 9),
+            category: triggerCat,
+            description: triggerDesc,
+            createdAt: new Date().toISOString(),
+            lastUpdated: new Date().toISOString()
+          });
+        }
+      }
+
+      const finalState: CompanionState = {
+        ...state,
+        moodHistory: [...state.moodHistory, newEntry],
+        memories: [...state.memories, ...autoMemories]
+      };
+      saveLocalState(finalState);
+      return finalState;
+    }
+
     try {
       const res = await fetch('/api/companion/mood', {
         method: 'POST',
@@ -155,6 +392,16 @@ export default function App() {
 
   // Erase memory node (Consent and sovereignty)
   const handleDeleteMemory = async (id: string) => {
+    if (isClientSide && state) {
+      const remainingMemories = state.memories.filter(m => m.id !== id);
+      const finalState = {
+        ...state,
+        memories: remainingMemories
+      };
+      saveLocalState(finalState);
+      return;
+    }
+
     try {
       const res = await fetch(`/api/companion/memories/${id}`, {
         method: 'DELETE',
@@ -172,6 +419,16 @@ export default function App() {
   // Reset companion state
   const handleReset = async () => {
     if (!confirm('Are you absolutely sure you want to reset all conversation histories and memory charts? This will start fresh.')) return;
+    
+    if (isClientSide) {
+      localStorage.removeItem('sana_local_state');
+      initializeLocalState();
+      setOnboardName('');
+      setActiveTab('home');
+      setNewMemoriesAlert([]);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const res = await fetch('/api/companion/reset', { method: 'POST' });
