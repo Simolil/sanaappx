@@ -24,8 +24,8 @@ export function getAi(): GoogleGenAI {
 
 /**
  * A helper function to call generateContent with retry logic and fallback models.
- * If gemini-3.5-flash fails or experiences high demand (503), it retries with backoff.
- * If it continues to fail, it falls back to gemini-3.1-flash-lite to protect availability.
+ * If gemini-2.0-flash fails or experiences high demand (503), it retries with backoff.
+ * If it continues to fail, it falls back to gemini-1.5-flash to protect availability.
  */
 async function generateContentWithRetry(
   ai: GoogleGenAI,
@@ -37,7 +37,7 @@ async function generateContentWithRetry(
   maxRetries = 3,
   delayMs = 1200
 ): Promise<any> {
-  const modelsToTry = [params.model, 'gemini-3.1-flash-lite'];
+  const modelsToTry = [params.model, 'gemini-1.5-flash'];
   const uniqueModels = Array.from(new Set(modelsToTry));
 
   let lastError: any = null;
@@ -263,7 +263,7 @@ ${moodContextStr}
     });
 
     const response = await generateContentWithRetry(ai, {
-      model: 'gemini-3.5-flash',
+      model: 'gemini-2.0-flash',
       contents,
       config: {
         systemInstruction,
@@ -313,7 +313,7 @@ Companion: "${modelMsg}"
 
   try {
     const response = await generateContentWithRetry(ai, {
-      model: 'gemini-3.5-flash',
+      model: 'gemini-2.0-flash',
       contents: [{ role: 'user', parts: [{ text: analysisPrompt }] }],
       config: {
         responseMimeType: 'application/json',

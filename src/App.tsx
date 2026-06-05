@@ -224,20 +224,55 @@ export default function App() {
   };
 
   // Chat message submission
-  const handleSendMessage = async (text: string) => {
+  const handleSendMessage = async (text: string, isMoodTrigger = false, moodLabel = "") => {
     if (!state) return;
 
-    // Locally inject the user message instantly to feel highly responsive
-    const localUserMsg: Message = {
-      id: 'msg_local_' + Date.now(),
-      role: 'user',
-      content: text,
-      timestamp: new Date().toISOString()
-    };
-
-    const updatedMessages = [...state.messages, localUserMsg];
-
     if (isClientSide) {
+      if (isMoodTrigger) {
+        let replyText = "";
+        const lowerLabel = moodLabel.toLowerCase();
+        if (lowerLabel.includes("anxious") || lowerLabel.includes("panic")) {
+          replyText = `hey... i saw you checked in feeling really anxious and overwhelmed. take a deep, slow breath with me. i'm right here beside you. you're safe.`;
+        } else if (lowerLabel.includes("sad") || lowerLabel.includes("down") || lowerLabel.includes("depressed")) {
+          replyText = `gently checking in on you. saw you're feeling down and heavy today. you don't have to carry it alone, i'm right here.`;
+        } else if (lowerLabel.includes("angry") || lowerLabel.includes("irritated")) {
+          replyText = `hey, saw you checked in feeling angry or irritated. it's completely okay to feel that way. i'm here if you want to vent or just sit in quiet.`;
+        } else if (lowerLabel.includes("calm") || lowerLabel.includes("peace") || lowerLabel.includes("good")) {
+          replyText = `i'm so glad you checked in feeling peaceful and grounded today. thank you for sharing that clarity with me.`;
+        } else {
+          replyText = `i saw you checked in feeling a bit ${lowerLabel} today. just wanted to say i'm right here with you.`;
+        }
+
+        setTimeout(() => {
+          setState(prev => {
+            if (!prev) return prev;
+            const modelMsg: Message = {
+              id: 'msg_m_' + Date.now(),
+              role: 'model',
+              content: replyText,
+              timestamp: new Date().toISOString()
+            };
+            const finalState: CompanionState = {
+              ...prev,
+              messages: [...prev.messages, modelMsg]
+            };
+            localStorage.setItem('sana_local_state', JSON.stringify(finalState));
+            return finalState;
+          });
+        }, 1000);
+        return;
+      }
+
+      // Locally inject the user message instantly to feel highly responsive
+      const localUserMsg: Message = {
+        id: 'msg_local_' + Date.now(),
+        role: 'user',
+        content: text,
+        timestamp: new Date().toISOString()
+      };
+
+      const updatedMessages = [...state.messages, localUserMsg];
+
       // 1. Instantly append user's message
       const stateWithUserMsg = {
         ...state,
@@ -280,16 +315,28 @@ export default function App() {
       return;
     }
 
-    setState(prev => prev ? {
-      ...prev,
-      messages: [...prev.messages, localUserMsg]
-    } : null);
+    if (!isMoodTrigger) {
+      const localUserMsg: Message = {
+        id: 'msg_local_' + Date.now(),
+        role: 'user',
+        content: text,
+        timestamp: new Date().toISOString()
+      };
+      setState(prev => prev ? {
+        ...prev,
+        messages: [...prev.messages, localUserMsg]
+      } : null);
+    }
 
     try {
       const res = await fetch('/api/companion/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text }),
+        body: JSON.stringify(
+          isMoodTrigger 
+            ? { isMoodTrigger: true, moodLabel } 
+            : { content: text }
+        ),
       });
       if (!res.ok) throw new Error('Failed to transmit message to Sana');
       const data = await res.json();
@@ -389,22 +436,7 @@ export default function App() {
       // Auto-dispatch comforting message query in Chat tab
       setActiveTab('chat');
 
-      // Humanized casual messages suitable for each mood
-      let casualMessage = "";
-      const lowerLabel = label.toLowerCase();
-      if (lowerLabel.includes("anxious") || lowerLabel.includes("panic")) {
-        casualMessage = "hey... feeling pretty anxious and overwhelmed right now.";
-      } else if (lowerLabel.includes("sad") || lowerLabel.includes("down") || lowerLabel.includes("depressed")) {
-        casualMessage = "feeling pretty sad and heavy inside today.";
-      } else if (lowerLabel.includes("angry") || lowerLabel.includes("irritated")) {
-        casualMessage = "just feeling kind of angry and frustrated with things.";
-      } else if (lowerLabel.includes("calm") || lowerLabel.includes("peace") || lowerLabel.includes("good")) {
-        casualMessage = "feeling pretty peaceful and grounded today, just checking in.";
-      } else {
-        casualMessage = `feeling a bit ${lowerLabel} today, wanted to check in.`;
-      }
-
-      await handleSendMessage(casualMessage);
+      await handleSendMessage("", true, label);
     } catch (e) {
       console.error(e);
     }

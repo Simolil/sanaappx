@@ -55,30 +55,36 @@ async function startServer() {
 
   app.post('/api/companion/chat', async (req, res) => {
     try {
-      const { content } = req.body;
-      if (!content || content.trim() === '') {
+      const { content, isMoodTrigger, moodLabel } = req.body;
+      if (!isMoodTrigger && (!content || content.trim() === '')) {
         return res.status(400).json({ error: 'Content is required' });
       }
 
       const state = await db.getState();
       const userName = state.profile.name;
 
-      // 1. Save user's message
-      const userMsg: Message = {
-        id: 'msg_u_' + Date.now(),
-        role: 'user',
-        content: content.trim(),
-        timestamp: new Date().toISOString()
-      };
-      await db.addMessage(userMsg);
+      let promptText = '';
+      if (isMoodTrigger) {
+        promptText = `[Transient Note: The user (${userName}) just checked in their mood on the home dashboard. They checked in with mood: "${moodLabel}". Sana should greet them warmly and address this mood with deep empathy and care, without any artificial prompt. Speak in her signature casual, low-key, cozy tone.]`;
+      } else {
+        promptText = content.trim();
+        // 1. Save user's message only if it's NOT a mood trigger
+        const userMsg: Message = {
+          id: 'msg_u_' + Date.now(),
+          role: 'user',
+          content: promptText,
+          timestamp: new Date().toISOString()
+        };
+        await db.addMessage(userMsg);
+      }
 
       // 2. Query Gemini Companion Response
       let replyText = '';
       try {
         const history = await db.getMessages();
         replyText = await generateCompanionResponse(
-          content,
-          history.slice(0, -1), // Exclude the newly added user message to avoid duplicate inside model generator
+          promptText,
+          history,
           userName,
           state.memories,
           state.moodHistory
@@ -98,20 +104,22 @@ async function startServer() {
       await db.addMessage(modelMsg);
 
       // 4. Background Memory extraction and persistence (run asynchronously to keep chat lightning-fast)
-      extractNewMemories(content, replyText, userName)
-        .then(async (newlyExtracted) => {
-          if (newlyExtracted && newlyExtracted.length > 0) {
-            for (const nm of newlyExtracted) {
-              await db.addMemory({
-                category: nm.category,
-                description: nm.description,
-              });
+      if (!isMoodTrigger) {
+        extractNewMemories(promptText, replyText, userName)
+          .then(async (newlyExtracted) => {
+            if (newlyExtracted && newlyExtracted.length > 0) {
+              for (const nm of newlyExtracted) {
+                await db.addMemory({
+                  category: nm.category,
+                  description: nm.description,
+                });
+              }
             }
-          }
-        })
-        .catch((memError) => {
-          console.warn("Skipped background memory extraction:", memError);
-        });
+          })
+          .catch((memError) => {
+            console.warn("Skipped background memory extraction:", memError);
+          });
+      }
 
       // Fetch current state instantly
       const updatedState = await db.getState();
