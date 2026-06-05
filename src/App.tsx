@@ -247,30 +247,34 @@ export default function App() {
 
       // 2. Simulate Sana typing briefly with subtle timing
       setTimeout(() => {
-        const resolution = getLocalSanaResponse(
-          text,
-          state.profile.name,
-          state.memories,
-          state.moodHistory
-        );
+        setState(prev => {
+          if (!prev) return prev;
+          const resolution = getLocalSanaResponse(
+            text,
+            prev.profile.name,
+            prev.memories,
+            prev.moodHistory
+          );
 
-        const modelMsg: Message = {
-          id: 'msg_m_' + Date.now(),
-          role: 'model',
-          content: resolution.reply,
-          timestamp: new Date().toISOString()
-        };
+          const modelMsg: Message = {
+            id: 'msg_m_' + Date.now(),
+            role: 'model',
+            content: resolution.reply,
+            timestamp: new Date().toISOString()
+          };
 
-        const finalState: CompanionState = {
-          ...stateWithUserMsg,
-          messages: [...updatedMessages, modelMsg],
-          memories: [...stateWithUserMsg.memories, ...resolution.newMemories]
-        };
+          const finalState: CompanionState = {
+            ...prev,
+            messages: [...prev.messages, modelMsg],
+            memories: [...prev.memories, ...resolution.newMemories]
+          };
 
-        if (resolution.newMemories.length > 0) {
-          setNewMemoriesAlert(resolution.newMemories);
-        }
-        saveLocalState(finalState);
+          if (resolution.newMemories.length > 0) {
+            setNewMemoriesAlert(resolution.newMemories);
+          }
+          localStorage.setItem('sana_local_state', JSON.stringify(finalState));
+          return finalState;
+        });
       }, 1000);
 
       return;
@@ -384,7 +388,23 @@ export default function App() {
       
       // Auto-dispatch comforting message query in Chat tab
       setActiveTab('chat');
-      await handleSendMessage(`I am checking in right now. I feel so ${label.toLowerCase()}.`);
+
+      // Humanized casual messages suitable for each mood
+      let casualMessage = "";
+      const lowerLabel = label.toLowerCase();
+      if (lowerLabel.includes("anxious") || lowerLabel.includes("panic")) {
+        casualMessage = "hey... feeling pretty anxious and overwhelmed right now.";
+      } else if (lowerLabel.includes("sad") || lowerLabel.includes("down") || lowerLabel.includes("depressed")) {
+        casualMessage = "feeling pretty sad and heavy inside today.";
+      } else if (lowerLabel.includes("angry") || lowerLabel.includes("irritated")) {
+        casualMessage = "just feeling kind of angry and frustrated with things.";
+      } else if (lowerLabel.includes("calm") || lowerLabel.includes("peace") || lowerLabel.includes("good")) {
+        casualMessage = "feeling pretty peaceful and grounded today, just checking in.";
+      } else {
+        casualMessage = `feeling a bit ${lowerLabel} today, wanted to check in.`;
+      }
+
+      await handleSendMessage(casualMessage);
     } catch (e) {
       console.error(e);
     }

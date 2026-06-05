@@ -185,12 +185,27 @@ export async function generateCompanionResponse(
   try {
     const ai = getAi();
 
-    // Standardize the memory sections
-    const triggers = memories.filter(m => m.category === 'trigger').map(m => m.description);
-    const helpful = memories.filter(m => m.category === 'helpful_strategy').map(m => m.description);
-    const unhelpful = memories.filter(m => m.category === 'unhelpful_strategy').map(m => m.description);
-    const context = memories.filter(m => m.category === 'context').map(m => m.description);
-    const preferences = memories.filter(m => m.category === 'preference').map(m => m.description);
+    // Standardize and cap the memory sections, prioritizing recently updated ones
+    const sortByRecent = (arr: Memory[]) =>
+      [...arr].sort((a, b) => 
+        new Date(b.lastUpdated || b.createdAt || 0).getTime() - new Date(a.lastUpdated || a.createdAt || 0).getTime()
+      );
+
+    const triggers = sortByRecent(memories.filter(m => m.category === 'trigger'))
+      .slice(0, 8)
+      .map(m => m.description);
+    const helpful = sortByRecent(memories.filter(m => m.category === 'helpful_strategy'))
+      .slice(0, 6)
+      .map(m => m.description);
+    const unhelpful = sortByRecent(memories.filter(m => m.category === 'unhelpful_strategy'))
+      .slice(0, 6)
+      .map(m => m.description);
+    const context = sortByRecent(memories.filter(m => m.category === 'context'))
+      .slice(0, 8)
+      .map(m => m.description);
+    const preferences = sortByRecent(memories.filter(m => m.category === 'preference'))
+      .slice(0, 6)
+      .map(m => m.description);
 
     const memoryContextStr = `
 PERSISTENT COMPANION MEMORY ABOUT THE USER (${userName}):
@@ -252,7 +267,7 @@ ${moodContextStr}
       contents,
       config: {
         systemInstruction,
-        temperature: 0.7,
+        temperature: 1.0,
         topP: 0.9,
       }
     });
@@ -299,7 +314,7 @@ Companion: "${modelMsg}"
   try {
     const response = await generateContentWithRetry(ai, {
       model: 'gemini-3.5-flash',
-      contents: analysisPrompt,
+      contents: [{ role: 'user', parts: [{ text: analysisPrompt }] }],
       config: {
         responseMimeType: 'application/json',
         responseSchema: {
